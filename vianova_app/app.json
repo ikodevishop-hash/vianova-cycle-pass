@@ -44,7 +44,7 @@
     ],
     "extra": {
       "appKind": "user",
-      "apiUrl": "http://localhost:4080"
+      "apiUrl": "https://vianova-demo.onrender.com"
     }
   }
 }

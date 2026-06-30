@@ -194,7 +194,13 @@
 
       <div class="view" id="v-customers">
         <div class="panel">
-          <div class="ph"><h2>顧客一覧</h2><span class="crumb" id="cust-count"></span></div>
+          <div class="ph">
+            <h2>顧客一覧</h2>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="crumb" id="cust-count"></span>
+              <button class="btn btn-ink btn-sm" id="cust-csv">⬇ CSVデータを書き出す</button>
+            </div>
+          </div>
           <div class="pb" style="padding:0"><div id="cust-table"></div></div>
         </div>
       </div>
@@ -374,6 +380,22 @@ async function renderCustomers(){
   </tbody></table>`;
   wrap.querySelectorAll('[data-cust]').forEach(tr=>tr.onclick=()=>openCustomer(tr.dataset.cust));
 }
+/* 顧客一覧 CSV：登録ID・レンタルID・自転車車種名・お名前・レンタル開始日・月々払い額（レンタル1件=1行） */
+async function exportCustomerCsv(){
+  let rentals;
+  try { ({ rentals } = await api('/api/admin/rentals')); }
+  catch { toast('書き出しに失敗しました'); return; }
+  if(!rentals.length){ toast('書き出すデータがありません'); return; }
+  const head=['登録ID','レンタルID','自転車車種名','お名前','レンタル開始日','月々払い額'];
+  const rows=rentals.map(r=>[r.memberId,r.rentalId,r.bikeName,r.customerName||'',fmtDate(r.startedAt),r.priceMonthly||0]);
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const csv='﻿'+[head,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`vianova_customers_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('CSVを書き出しました');
+}
+$('cust-csv').onclick=exportCustomerCsv;
 async function openCustomer(memberId){
   const { customer:u, rentals } = await api('/api/admin/customers/'+encodeURIComponent(memberId));
   const r0 = rentals[0];
