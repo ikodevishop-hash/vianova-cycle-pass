@@ -1,0 +1,9 @@
+**/node_modules
+**/data
+**/.expo
+**/dist
+vianova_app
+mnt
+index.html
+*.md
+.git

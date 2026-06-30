@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Vianova Cycle Pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#123A40; --ink2:#1C4F57; --paper:#F6F4EE; --card:#FFFFFF;
+    --accent:#15B981; --accent-press:#0E9468; --persimmon:#E8643C;
+    --text:#16201F; --muted:#5F706F; --line:#E6E8E1;
+    --radius:18px; --radius-sm:12px;
+    --shadow:0 8px 30px rgba(18,58,64,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Noto Sans JP","Noto Sans SC","Noto Sans KR",system-ui,sans-serif;
+    background:var(--paper); color:var(--text);
+    -webkit-font-smoothing:antialiased; line-height:1.6;
+  }
+  .app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--paper);position:relative;display:flex;flex-direction:column}
+  .screen{display:none;flex-direction:column;flex:1;animation:fade .25s ease}
+  .screen.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none}}
+
+  .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;
+    padding:14px 16px;background:var(--ink);color:#fff;min-height:56px}
+  .topbar .title{font-weight:700;font-size:17px;letter-spacing:.01em}
+  .back{appearance:none;border:0;background:rgba(255,255,255,.14);color:#fff;
+    width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+  .back:active{background:rgba(255,255,255,.28)}
+  .topbar .spacer{flex:1}
+
+  /* language selector */
+  .lang-select{appearance:none;background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:999px;
+    padding:7px 28px 7px 12px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='white' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 11px center}
+  .lang-select option{color:#16201F}
+  .lang-select.dark{background-color:rgba(18,58,64,.08);color:var(--ink);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23123A40' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+
+  .body{padding:18px 16px 28px;flex:1}
+
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);position:relative;flex:0 0 auto}
+  .brand .mark::before,.brand .mark::after{content:"";position:absolute;border:2.5px solid #fff;border-radius:50%;width:11px;height:11px;bottom:7px}
+  .brand .mark::before{left:5px}.brand .mark::after{right:5px}
+  .brand .name{font-family:"Outfit",sans-serif;font-weight:700;font-size:18px;color:#fff;line-height:1.1}
+  .brand .name small{display:block;font-size:10px;letter-spacing:.18em;color:rgba(255,255,255,.7);font-weight:600}
+
+  .hero{padding:24px 22px 30px;background:var(--ink);color:#fff;border-radius:0 0 28px 28px}
+  .hero .logo{display:flex;align-items:center;gap:12px}
+  .hero .logo .mark{width:44px;height:44px;border-radius:12px}
+  .hero h1{font-family:"Outfit","Noto Sans JP","Noto Sans SC","Noto Sans KR",sans-serif;font-size:29px;line-height:1.18;margin:0 0 8px;font-weight:700}
+  .hero p{margin:0;color:rgba(255,255,255,.78);font-size:14px}
+  .hero .pill{display:inline-block;margin-top:18px;background:rgba(21,185,129,.2);color:#7DEABB;
+    padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.02em}
+
+  h2{font-size:20px;margin:0 0 4px;font-weight:700}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .card+.card{margin-top:14px}
+
+  label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--ink)}
+  .field{position:relative}
+  input[type=text],input[type=email],input[type=password],input[type=tel],input[type=date],input[type=number],textarea,select{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+    font-size:15px;font-family:inherit;background:#fff;color:var(--text);transition:border-color .15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:90px}
+  .with-toggle input{padding-right:62px}
+  .toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;
+    color:var(--ink2);font-weight:700;font-size:12px;padding:8px;cursor:pointer}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+  .err{font-size:12px;color:var(--persimmon);margin-top:5px;font-weight:600;min-height:1px}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    padding:15px;border:0;border-radius:var(--radius-sm);font-size:15.5px;font-weight:700;
+    font-family:inherit;cursor:pointer;transition:transform .05s,background .15s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:active{background:var(--accent-press)}
+  .btn-primary:disabled{background:#C2D6CE;color:#fff;cursor:not-allowed}
+  .btn-ink{background:var(--ink);color:#fff}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn+.btn{margin-top:10px}
+  .linkbtn{background:none;border:0;color:var(--ink2);font-weight:700;font-size:14px;cursor:pointer;padding:8px;font-family:inherit}
+
+  .checkrow{display:flex;align-items:flex-start;gap:10px;margin-top:8px}
+  .checkrow input{width:20px;height:20px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+  .checkrow span{font-size:13.5px;color:var(--text)}
+
+  .menu{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .menu-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:16px;cursor:pointer;text-align:left;width:100%;font-family:inherit;box-shadow:var(--shadow)}
+  .menu-item:active{border-color:var(--accent)}
+  .menu-ic{width:44px;height:44px;border-radius:12px;background:#EAF7F1;color:var(--accent-press);
+    display:grid;place-items:center;font-size:21px;flex:0 0 auto}
+  .menu-tx b{display:block;font-size:15.5px;color:var(--ink)}
+  .menu-tx small{color:var(--muted);font-size:12.5px}
+  .menu-item .chev{margin-left:auto;color:#BFCBC8;font-size:20px}
+
+  .bike{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;box-shadow:var(--shadow);margin-bottom:14px;position:relative}
+  .bike.disabled{opacity:.6;cursor:not-allowed}
+  .bike .photo{width:118px;flex:0 0 auto;background:linear-gradient(135deg,#DCE7E3,#EAF1EE);display:grid;place-items:center;font-size:40px}
+  .bike img.photo{object-fit:cover}
+  .bike .info{padding:13px 12px 13px 0;flex:1;min-width:0}
+  .bike .info b{font-size:15.5px;color:var(--ink);display:block}
+  .bike .info .spec{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .bike .info .price{margin-top:8px;font-weight:700;color:var(--accent-press);font-size:14px}
+  .bike .info .price small{color:var(--muted);font-weight:500}
+  .badge{position:absolute;top:10px;right:10px;background:var(--persimmon);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .badge.ok{background:var(--accent)}
+
+  .gallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+  .gallery .g{flex:0 0 86%;height:200px;border-radius:var(--radius);background:linear-gradient(135deg,#DCE7E3,#EAF1EE);
+    display:grid;place-items:center;font-size:64px;scroll-snap-align:center;overflow:hidden}
+  .gallery img.g{object-fit:cover}
+  .spectable{width:100%;border-collapse:collapse;margin-top:6px}
+  .spectable td{padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+  .spectable td:first-child{color:var(--muted);width:38%;font-weight:500}
+  .spectable td:last-child{font-weight:600;color:var(--ink)}
+
+  .big-amount{font-family:"Outfit",sans-serif;font-size:42px;font-weight:700;color:var(--ink)}
+  .big-amount small{font-size:16px;color:var(--muted);font-weight:600}
+
+  .news-item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .news-item .date{font-size:11.5px;color:var(--accent-press);font-weight:700;letter-spacing:.04em}
+  .news-item h3{margin:5px 0 6px;font-size:15.5px}
+  .news-item p{margin:0;font-size:13.5px;color:var(--muted);white-space:pre-wrap}
+
+  .terms-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;
+    font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.8}
+
+  .empty{text-align:center;color:var(--muted);padding:48px 20px}
+  .empty .em-ic{font-size:46px;opacity:.5}
+  .empty p{margin:10px 0 0;font-size:14px}
+
+  .id-photo-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:24px;background:#FbFbF9;cursor:pointer;width:100%}
+  .id-photo-btn .cam{font-size:34px}
+  .id-photo-btn span{font-size:13px;color:var(--muted)}
+  .id-preview{margin-top:10px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--line)}
+  .id-preview img{width:100%;display:block}
+
+  .gmo-screen{background:linear-gradient(180deg,#0E2E33,#123A40);color:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .gmo-screen .gmo-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .gmo-screen .gmo-logo{font-family:"Outfit",sans-serif;font-weight:700;font-size:18px}
+  .gmo-screen .secure{font-size:11px;background:rgba(255,255,255,.15);padding:4px 9px;border-radius:999px}
+  .gmo-screen label{color:rgba(255,255,255,.85)}
+  .gmo-screen input{background:rgba(255,255,255,.95)}
+  .gmo-note{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:14px;text-align:center}
+
+  .success{text-align:center;padding:30px 10px}
+  .success .ok-ic{width:84px;height:84px;border-radius:50%;background:#EAF7F1;color:var(--accent);
+    display:grid;place-items:center;font-size:46px;margin:0 auto 18px}
+  .rid{font-family:"Outfit",sans-serif;font-size:30px;font-weight:700;letter-spacing:.08em;color:var(--ink);
+    background:#fff;border:1.5px dashed var(--accent);border-radius:14px;padding:14px;margin:14px 0}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);
+    color:#fff;padding:13px 20px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.25s;z-index:100;pointer-events:none;max-width:90%}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .reset-banner{background:#EAF7F1;border:1px solid #BCE6D5;border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--ink2);margin-top:14px}
+  .reset-banner b{display:block;margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===== LOGIN ===== -->
+  <section class="screen active" id="s-login">
+    <div class="hero">
+      <div class="hero-top">
+        <span class="brand"><span class="mark"></span><span class="name">Vianova<small>CYCLE PASS</small></span></span>
+        <!-- lang selector injected -->
+      </div>
+      <h1><span data-i18n="heroTitle1"></span><br><span data-i18n="heroTitle2"></span></h1>
+      <p data-i18n="heroSub"></p>
+      <span class="pill" data-i18n="heroPill"></span>
+    </div>
+    <div class="body">
+      <div class="card">
+        <h2 data-i18n="loginH"></h2>
+        <p class="sub" data-i18n="loginSub"></p>
+        <label data-i18n="labelId"></label>
+        <div class="field"><input type="text" id="li-id" maxlength="12" autocomplete="username" data-i18n-ph="phId"></div>
+        <label data-i18n="labelPw"></label>
+        <div class="field with-toggle">
+          <input type="password" id="li-pw" autocomplete="current-password" data-i18n-ph="phPw">
+          <button class="toggle" type="button" data-toggle="li-pw"></button>
+        </div>
+        <div class="err" id="li-err"></div>
+        <button class="btn btn-primary" id="li-go" style="margin-top:16px" data-i18n="btnLogin"></button>
+        <button class="linkbtn" id="li-forgot" style="display:block;margin:10px auto 0" data-i18n="forgot"></button>
+      </div>
+      <button class="btn btn-ghost" id="li-toreg" style="margin-top:14px" data-i18n="toRegister"></button>
+    </div>
+  </section>
+
+  <!-- ===== REGISTER ===== -->
+  <section class="screen" id="s-register">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="regTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <div class="card">
+        <label><span data-i18n="labelId"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="text" id="rg-id" maxlength="12" data-i18n-ph="phIdReg"></div>
+        <div class="hint" data-i18n="hintId"></div>
+        <div class="err" id="rg-id-err"></div>
+
+        <label><span data-i18n="labelEmail"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="email" id="rg-email" placeholder="you@example.com"></div>
+        <div class="hint" data-i18n="hintEmail"></div>
+        <div class="err" id="rg-email-err"></div>
+
+        <label><span data-i18n="labelPw"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field with-toggle">
+          <input type="password" id="rg-pw" data-i18n-ph="phPwReg">
+          <button class="toggle" type="button" data-toggle="rg-pw"></button>
+        </div>
+        <div class="hint" data-i18n="hintPw"></div>
+        <div class="err" id="rg-pw-err"></div>
+
+        <label><span data-i18n="labelPw2"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field with-toggle">
+          <input type="password" id="rg-pw2" data-i18n-ph="phPw2">
+          <button class="toggle" type="button" data-toggle="rg-pw2"></button>
+        </div>
+        <div class="err" id="rg-pw2-err"></div>
+
+        <button class="btn btn-primary" id="rg-go" style="margin-top:18px" data-i18n="btnRegister"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FORGOT ===== -->
+  <section class="screen" id="s-forgot">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="fgTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <div class="card">
+        <h2 data-i18n="fgH"></h2>
+        <p class="sub" data-i18n="fgSub"></p>
+        <label data-i18n="labelEmail"></label>
+        <div class="field"><input type="email" id="fg-email" placeholder="you@example.com"></div>
+        <div class="err" id="fg-err"></div>
+        <button class="btn btn-primary" id="fg-go" style="margin-top:16px" data-i18n="btnSend"></button>
+        <div class="reset-banner" id="fg-done" style="display:none">
+          <b data-i18n="fgDoneB"></b>
+          <span data-i18n="fgDoneBody"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GATE ===== -->
+  <section class="screen" id="s-gate">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="gateTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <h2 data-i18n="gateH"></h2>
+      <p class="sub" data-i18n="gateSub"></p>
+      <div class="terms-box" id="gate-terms"></div>
+      <div class="card" style="margin-top:14px">
+        <div class="checkrow">
+          <input type="checkbox" id="gate-check">
+          <span data-i18n="gateCheck"></span>
+        </div>
+        <button class="btn btn-primary" id="gate-go" disabled style="margin-top:16px" data-i18n="gateGo"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOME ===== -->
+  <section class="screen" id="s-home">
+    <div class="topbar">
+      <span class="brand"><span class="mark"></span><span class="name" style="font-size:16px">Vianova<small>CYCLE PASS</small></span></span>
+      <span class="spacer"></span>
+      <button class="back" id="home-logout" style="font-size:15px">⎋</button>
+    </div>
+    <div class="body">
+      <h2 id="home-hello"></h2>
+      <p class="sub" data-i18n="homeSub"></p>
+      <div class="menu">
+        <button class="menu-item" data-go="s-bikes"><span class="menu-ic">🚲</span><span class="menu-tx"><b data-i18n="mBikesT"></b><small data-i18n="mBikesS"></small></span><span class="chev">›</span></button>
+        <button class="menu-item" data-go="s-cert"><span class="menu-ic">📄</span><span class="menu-tx"><b data-i18n="mCertT"></b><small data-i18n="mCertS"></small></span><span class="chev">›</span></button>
+        <button class="menu-item" data-go="s-amount"><span class="menu-ic">💴</span><span class="menu-tx"><b data-i18n="mAmtT"></b><small data-i18n="mAmtS"></small></span><span class="chev">›</span></button>
+        <button class="menu-item" data-go="s-news"><span class="menu-ic">📣</span><span class="menu-tx"><b data-i18n="mNewsT"></b><small data-i18n="mNewsS"></small></span><span class="chev">›</span></button>
+        <button class="menu-item" data-go="s-terms"><span class="menu-ic">📑</span><span class="menu-tx"><b data-i18n="mTermsT"></b><small data-i18n="mTermsS"></small></span><span class="chev">›</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BIKE LIST ===== -->
+  <section class="screen" id="s-bikes">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="bikesTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div id="bikes-list"></div></div>
+  </section>
+
+  <!-- ===== BIKE DETAIL ===== -->
+  <section class="screen" id="s-bike">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="detailTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div id="bike-detail"></div></div>
+  </section>
+
+  <!-- ===== APPLY ===== -->
+  <section class="screen" id="s-apply">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="applyTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <div class="card">
+        <h2 id="apply-bikename"></h2>
+        <p class="sub" data-i18n="applySub"></p>
+        <label><span data-i18n="labelName"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="text" id="ap-name" data-i18n-ph="phName"></div>
+        <label><span data-i18n="labelBirth"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="date" id="ap-birth"></div>
+        <label><span data-i18n="labelAddr"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="text" id="ap-addr" data-i18n-ph="phAddr"></div>
+        <label><span data-i18n="labelTel"></span> <span style="color:var(--persimmon)">*</span></label>
+        <div class="field"><input type="tel" id="ap-tel" placeholder="090-1234-5678"></div>
+        <label><span data-i18n="labelIdDoc"></span> <span style="color:var(--persimmon)">*</span></label>
+        <input type="file" id="ap-idfile" accept="image/*" capture="environment" hidden>
+        <button class="id-photo-btn" id="ap-idbtn" type="button">
+          <span class="cam">📷</span><span data-i18n="idCam"></span>
+        </button>
+        <div class="id-preview" id="ap-idprev" style="display:none"><img id="ap-idimg" alt=""></div>
+        <div class="err" id="ap-err"></div>
+        <button class="btn btn-primary" id="ap-go" style="margin-top:18px" data-i18n="btnToPayment"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GMO ===== -->
+  <section class="screen" id="s-gmo">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="gmoTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <div class="gmo-screen">
+        <div class="gmo-head"><span class="gmo-logo">GMO PAYMENT</span><span class="secure" data-i18n="gmoSecure"></span></div>
+        <p style="font-size:12.5px;color:rgba(255,255,255,.7);margin:0 0 8px" data-i18n="gmoLinktype"></p>
+        <label data-i18n="labelCard"></label>
+        <div class="field"><input type="tel" id="gmo-num" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1"><label data-i18n="labelExp"></label><div class="field"><input type="text" id="gmo-exp" placeholder="MM / YY"></div></div>
+          <div style="flex:1"><label data-i18n="labelCvc"></label><div class="field"><input type="tel" id="gmo-cvc" placeholder="123" maxlength="4"></div></div>
+        </div>
+        <label data-i18n="labelHolder"></label>
+        <div class="field"><input type="text" id="gmo-name" placeholder="TARO YAMADA"></div>
+        <button class="btn btn-primary" id="gmo-go" style="margin-top:18px;background:#15B981" data-i18n="btnConfirmRental"></button>
+        <p class="gmo-note" data-i18n="gmoNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SUCCESS ===== -->
+  <section class="screen" id="s-success">
+    <div class="topbar"><span class="title" data-i18n="successTitle"></span><span class="spacer"></span></div>
+    <div class="body">
+      <div class="success">
+        <div class="ok-ic">✓</div>
+        <h2 data-i18n="successH"></h2>
+        <p class="sub" data-i18n="successSub"></p>
+        <div class="rid" id="suc-rid">--------</div>
+        <p class="sub" id="suc-bike"></p>
+        <button class="btn btn-primary" id="suc-cert" style="margin-top:8px" data-i18n="btnViewCert"></button>
+        <button class="btn btn-ghost" id="suc-home" style="margin-top:10px" data-i18n="btnToHome"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CERT ===== -->
+  <section class="screen" id="s-cert">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="certTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div id="cert-list"></div></div>
+  </section>
+
+  <!-- ===== AMOUNT ===== -->
+  <section class="screen" id="s-amount">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="amountTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div id="amount-body"></div></div>
+  </section>
+
+  <!-- ===== NEWS ===== -->
+  <section class="screen" id="s-news">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="newsTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div id="news-list"></div></div>
+  </section>
+
+  <!-- ===== TERMS ===== -->
+  <section class="screen" id="s-terms">
+    <div class="topbar"><button class="back" data-back>‹</button><span class="title" data-i18n="termsTitle"></span><span class="spacer"></span></div>
+    <div class="body"><div class="terms-box" id="terms-body"></div></div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Vianova Cycle Pass — ユーザー版 試作版（多言語対応）
+   ========================================================= */
+const DB={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){localStorage.setItem(k,JSON.stringify(v));}};
+const K={users:'vcp_users',bikes:'vcp_bikes',rentals:'vcp_rentals',terms:'vcp_terms',news:'vcp_news',session:'vcp_session',lang:'vcp_lang'};
+
+/* ---------- 多言語辞書 ---------- */
+const T={
+ ja:{heroTitle1:'毎月のりかえ自由。',heroTitle2:'メンテ込みの自転車生活。',heroSub:'月額制でいつでも快適。点検・整備はすべておまかせ。',heroPill:'● メンテナンス込み 月額レンタル',
+  loginH:'ログイン',loginSub:'会員IDとパスワードを入力してください。',labelId:'会員ID',phId:'英数12文字以内',labelPw:'パスワード',phPw:'パスワード',
+  show:'表示',hide:'非表示',btnLogin:'ログイン',forgot:'パスワードをお忘れですか？',toRegister:'新規登録はこちら',loginErr:'会員IDまたはパスワードが正しくありません。',
+  regTitle:'新規登録',phIdReg:'英数12文字以内',hintId:'半角の英字・数字のみ、12文字以内。すでに使われているIDは登録できません。',
+  labelEmail:'メールアドレス',hintEmail:'パスワード再設定の際に使用します。',phPwReg:'記号・英数を含む8文字以上',hintPw:'英字と数字を含む8文字以上。記号も使えます。',
+  labelPw2:'パスワード（確認）',phPw2:'もう一度入力',btnRegister:'登録する',
+  errIdReq:'会員IDを入力してください。',errIdAlnum:'英字・数字のみで入力してください。',errIdLen:'12文字以内で入力してください。',errIdTaken:'このIDは既に使われています。別のIDをお選びください。',
+  errEmail:'正しいメールアドレスを入力してください。',errPw:'英字と数字を含む8文字以上で入力してください。',errPw2:'パスワードが一致しません。',toastRegistered:'登録が完了しました',
+  fgTitle:'パスワード再設定',fgH:'再設定メールの送信',fgSub:'ご登録のメールアドレスに、パスワード再設定用のリンクをお送りします。',btnSend:'再設定メールを送信',
+  fgDoneB:'✓ 送信しました（試作版）',fgDoneBody:'ご登録のメールアドレス宛に再設定リンクを送信した想定です。本番ではここから新しいパスワードを設定できます。',
+  gateTitle:'利用規約への同意',gateH:'ご利用の前に',gateSub:'サービスをご利用いただくには、利用規約への同意が必要です。',gateCheck:'利用規約の内容を確認し、同意します。',gateGo:'同意して進む',
+  homeSub:'本日もご利用ありがとうございます。',homeHello:'{id} さん、こんにちは',
+  mBikesT:'レンタル自転車一覧',mBikesS:'借りられる自転車を見る',mCertT:'レンタル中自転車証明書',mCertS:'いま借りている自転車',mAmtT:'今月の利用金額',mAmtS:'今月のお支払い予定',mNewsT:'お店からのお知らせ',mNewsS:'最新情報・キャンペーン',mTermsT:'利用規約',mTermsS:'サービスの規約を確認',
+  bikesTitle:'レンタル自転車一覧',badgeRenting:'レンタル中',badgeSoldout:'在庫なし',toastLocked:'レンタル中、または在庫がありません',perMonth:'/月',emptyBikes:'現在ご利用いただける自転車がありません。',
+  detailTitle:'自転車の詳細',perMonthTax:'/月（税込）',maintIncluded:'メンテナンス・点検費用込み',specFeature:'特徴',specPrice:'月額料金',specStock:'在庫',stockNone:'なし',btnApplyThis:'この自転車をレンタル申込',
+  applyTitle:'レンタル申込',applyH:'{name} のお申込み',applyHFallback:'お申込み内容',applySub:'ご本人さまの情報をご入力ください。',labelName:'お名前',phName:'山田 太郎',labelBirth:'生年月日',labelAddr:'ご住所',phAddr:'〇〇県〇〇市…',labelTel:'電話番号',labelIdDoc:'本人確認書類の撮影',idCam:'カメラで身分証明書を撮影',btnToPayment:'お支払い情報の登録へ進む',errAllFields:'すべての項目をご入力ください。',errIdPhoto:'本人確認書類を撮影してください。',
+  gmoTitle:'お支払い情報の登録',gmoSecure:'🔒 SSL 保護',gmoLinktype:'リンクタイプPlus（カード決済）',labelCard:'カード番号',labelExp:'有効期限',labelCvc:'セキュリティコード',labelHolder:'カード名義',btnConfirmRental:'登録してレンタルを確定',gmoNote:'※ 試作版です。実際の決済は行われません。本番ではGMOの安全な画面に遷移します。',toastCard:'カード情報をご入力ください',
+  successTitle:'お申込み完了',successH:'レンタルが確定しました',successSub:'お客様のレンタルIDは以下のとおりです。',btnViewCert:'レンタル証明書を見る',btnToHome:'ホームに戻る',
+  certTitle:'レンタル中自転車証明書',emptyCert:'現在レンタル中の自転車はありません。',certStart:'レンタル開始日',certBikename:'自転車名',certSpec:'スペック',certPrice:'月額料金',certHolder:'ご契約者',
+  amountTitle:'今月の利用金額',emptyAmount:'今月のご利用はありません。',amountLabel:'{y}年 {m}月のお支払い予定',amountVia:'GMOカード決済（リンクタイプPlus）にて請求',amountTotal:'合計',
+  newsTitle:'お店からのお知らせ',emptyNews:'現在お知らせはありません。',newsToYou:'あなた宛',termsTitle:'利用規約',logoutConfirm:'ログアウトしますか？'},
+
+ en:{heroTitle1:'Switch bikes anytime.',heroTitle2:'Cycling with maintenance included.',heroSub:'Comfortable anytime on a monthly plan. Leave all inspection and maintenance to us.',heroPill:'● Monthly rental · maintenance included',
+  loginH:'Log in',loginSub:'Enter your member ID and password.',labelId:'Member ID',phId:'Up to 12 letters/numbers',labelPw:'Password',phPw:'Password',
+  show:'Show',hide:'Hide',btnLogin:'Log in',forgot:'Forgot your password?',toRegister:'Create a new account',loginErr:'Incorrect member ID or password.',
+  regTitle:'Sign up',phIdReg:'Up to 12 letters/numbers',hintId:'Letters and numbers only, up to 12 characters. IDs already in use cannot be registered.',
+  labelEmail:'Email',hintEmail:'Used to reset your password.',phPwReg:'8+ chars incl. letters & numbers',hintPw:'At least 8 characters including letters and numbers. Symbols are allowed.',
+  labelPw2:'Password (confirm)',phPw2:'Enter again',btnRegister:'Register',
+  errIdReq:'Please enter a member ID.',errIdAlnum:'Use letters and numbers only.',errIdLen:'Use up to 12 characters.',errIdTaken:'This ID is already taken. Please choose another.',
+  errEmail:'Please enter a valid email address.',errPw:'Enter at least 8 characters including letters and numbers.',errPw2:'Passwords do not match.',toastRegistered:'Registration complete',
+  fgTitle:'Reset password',fgH:'Send reset email',fgSub:"We'll send a password reset link to your registered email.",btnSend:'Send reset email',
+  fgDoneB:'✓ Sent (prototype)',fgDoneBody:"We've simulated sending a reset link to your email. In the live version you can set a new password from here.",
+  gateTitle:'Agree to terms',gateH:'Before you start',gateSub:'You must agree to the terms of service to use the app.',gateCheck:'I have read and agree to the terms of service.',gateGo:'Agree and continue',
+  homeSub:'Thank you for using our service today.',homeHello:'Hello, {id}',
+  mBikesT:'Available bikes',mBikesS:'Browse bikes you can rent',mCertT:'Rental certificate',mCertS:"Bikes you're renting now",mAmtT:"This month's charges",mAmtS:'Your payment due this month',mNewsT:'Announcements',mNewsS:'News & campaigns',mTermsT:'Terms of service',mTermsS:'View the service terms',
+  bikesTitle:'Available bikes',badgeRenting:'Renting',badgeSoldout:'Out of stock',toastLocked:'Already renting or out of stock',perMonth:'/mo',emptyBikes:'No bikes are available right now.',
+  detailTitle:'Bike details',perMonthTax:'/mo (incl. tax)',maintIncluded:'Maintenance & inspection included',specFeature:'Features',specPrice:'Monthly fee',specStock:'Stock',stockNone:'None',btnApplyThis:'Apply to rent this bike',
+  applyTitle:'Rental application',applyH:'Apply for {name}',applyHFallback:'Application',applySub:'Please enter your personal details.',labelName:'Name',phName:'Taro Yamada',labelBirth:'Date of birth',labelAddr:'Address',phAddr:'123 Main St…',labelTel:'Phone number',labelIdDoc:'Photograph your ID',idCam:'Take a photo of your ID',btnToPayment:'Continue to payment',errAllFields:'Please fill in all fields.',errIdPhoto:'Please photograph your ID.',
+  gmoTitle:'Payment registration',gmoSecure:'🔒 SSL secured',gmoLinktype:'Link Type Plus (card payment)',labelCard:'Card number',labelExp:'Expiry',labelCvc:'Security code',labelHolder:'Cardholder name',btnConfirmRental:'Register and confirm rental',gmoNote:'* Prototype only. No real payment is processed. The live version uses GMO\u2019s secure screen.',toastCard:'Please enter card details',
+  successTitle:'Application complete',successH:'Your rental is confirmed',successSub:'Your rental ID is shown below.',btnViewCert:'View rental certificate',btnToHome:'Back to home',
+  certTitle:'Rental certificate',emptyCert:'You have no active rentals.',certStart:'Rental start date',certBikename:'Bike name',certSpec:'Specs',certPrice:'Monthly fee',certHolder:'Contract holder',
+  amountTitle:"This month's charges",emptyAmount:'No usage this month.',amountLabel:'Estimated charge for {m}/{y}',amountVia:'Billed via GMO card payment (Link Type Plus)',amountTotal:'Total',
+  newsTitle:'Announcements',emptyNews:'No announcements at this time.',newsToYou:'To you',termsTitle:'Terms of service',logoutConfirm:'Log out?'},
+
+ zh:{heroTitle1:'每月自由换车。',heroTitle2:'含保养的自行车生活。',heroSub:'月费制随时舒适，检查与保养全部交给我们。',heroPill:'● 含保养 月租',
+  loginH:'登录',loginSub:'请输入会员ID和密码。',labelId:'会员ID',phId:'12位以内英数字',labelPw:'密码',phPw:'密码',
+  show:'显示',hide:'隐藏',btnLogin:'登录',forgot:'忘记密码？',toRegister:'注册新账户',loginErr:'会员ID或密码不正确。',
+  regTitle:'注册',phIdReg:'12位以内英数字',hintId:'仅限半角英文与数字，12位以内。已被使用的ID无法注册。',
+  labelEmail:'邮箱',hintEmail:'用于重置密码。',phPwReg:'8位以上，含英数字，可含符号',hintPw:'至少8位，需含英文与数字，可使用符号。',
+  labelPw2:'密码（确认）',phPw2:'再次输入',btnRegister:'注册',
+  errIdReq:'请输入会员ID。',errIdAlnum:'请仅使用英文和数字。',errIdLen:'请输入12位以内。',errIdTaken:'该ID已被使用，请选择其他ID。',
+  errEmail:'请输入正确的邮箱地址。',errPw:'请输入至少8位且含英文与数字。',errPw2:'两次密码不一致。',toastRegistered:'注册完成',
+  fgTitle:'重置密码',fgH:'发送重置邮件',fgSub:'我们会向您注册的邮箱发送密码重置链接。',btnSend:'发送重置邮件',
+  fgDoneB:'✓ 已发送（试作版）',fgDoneBody:'已模拟向您的邮箱发送重置链接。正式版中可在此设置新密码。',
+  gateTitle:'同意使用条款',gateH:'使用前须知',gateSub:'使用本服务需同意使用条款。',gateCheck:'我已阅读并同意使用条款。',gateGo:'同意并继续',
+  homeSub:'感谢您今日的使用。',homeHello:'{id}，您好',
+  mBikesT:'可租自行车一览',mBikesS:'查看可租自行车',mCertT:'租借中证明',mCertS:'当前租借的自行车',mAmtT:'本月费用',mAmtS:'本月应付款',mNewsT:'店铺通知',mNewsS:'最新资讯与活动',mTermsT:'使用条款',mTermsS:'查看服务条款',
+  bikesTitle:'可租自行车一览',badgeRenting:'租借中',badgeSoldout:'无库存',toastLocked:'租借中或无库存',perMonth:'/月',emptyBikes:'目前没有可用的自行车。',
+  detailTitle:'自行车详情',perMonthTax:'/月（含税）',maintIncluded:'含保养与检查费用',specFeature:'特点',specPrice:'月费',specStock:'库存',stockNone:'无',btnApplyThis:'申请租借此车',
+  applyTitle:'租借申请',applyH:'申请租借 {name}',applyHFallback:'申请内容',applySub:'请输入本人信息。',labelName:'姓名',phName:'张三',labelBirth:'出生日期',labelAddr:'地址',phAddr:'〇〇省〇〇市…',labelTel:'电话号码',labelIdDoc:'拍摄身份证件',idCam:'用相机拍摄身份证件',btnToPayment:'前往登记支付信息',errAllFields:'请填写所有项目。',errIdPhoto:'请拍摄身份证件。',
+  gmoTitle:'登记支付信息',gmoSecure:'🔒 SSL 保护',gmoLinktype:'Link Type Plus（信用卡支付）',labelCard:'卡号',labelExp:'有效期',labelCvc:'安全码',labelHolder:'持卡人姓名',btnConfirmRental:'登记并确认租借',gmoNote:'※ 此为试作版，不会实际扣款。正式版将跳转至GMO安全页面。',toastCard:'请输入卡片信息',
+  successTitle:'申请完成',successH:'租借已确认',successSub:'您的租借ID如下。',btnViewCert:'查看租借证明',btnToHome:'返回首页',
+  certTitle:'租借中证明',emptyCert:'目前没有租借中的自行车。',certStart:'租借开始日',certBikename:'自行车名称',certSpec:'规格',certPrice:'月费',certHolder:'签约人',
+  amountTitle:'本月费用',emptyAmount:'本月无使用记录。',amountLabel:'{y}年{m}月的应付金额',amountVia:'通过GMO信用卡支付（Link Type Plus）收款',amountTotal:'合计',
+  newsTitle:'店铺通知',emptyNews:'暂无通知。',newsToYou:'致您',termsTitle:'使用条款',logoutConfirm:'要退出登录吗？'},
+
+ ko:{heroTitle1:'매달 자유롭게 교체.',heroTitle2:'정비 포함 자전거 라이프.',heroSub:'월정액으로 언제나 쾌적. 점검·정비는 모두 맡기세요.',heroPill:'● 정비 포함 월 렌탈',
+  loginH:'로그인',loginSub:'회원 ID와 비밀번호를 입력하세요.',labelId:'회원 ID',phId:'영문·숫자 12자 이내',labelPw:'비밀번호',phPw:'비밀번호',
+  show:'표시',hide:'숨김',btnLogin:'로그인',forgot:'비밀번호를 잊으셨나요?',toRegister:'신규 가입하기',loginErr:'회원 ID 또는 비밀번호가 올바르지 않습니다.',
+  regTitle:'신규 가입',phIdReg:'영문·숫자 12자 이내',hintId:'영문·숫자만, 12자 이내. 이미 사용 중인 ID는 등록할 수 없습니다.',
+  labelEmail:'이메일',hintEmail:'비밀번호 재설정 시 사용됩니다.',phPwReg:'영문·숫자 포함 8자 이상',hintPw:'영문과 숫자를 포함한 8자 이상. 기호도 사용할 수 있습니다.',
+  labelPw2:'비밀번호 (확인)',phPw2:'다시 입력',btnRegister:'등록하기',
+  errIdReq:'회원 ID를 입력하세요.',errIdAlnum:'영문과 숫자만 입력하세요.',errIdLen:'12자 이내로 입력하세요.',errIdTaken:'이미 사용 중인 ID입니다. 다른 ID를 선택하세요.',
+  errEmail:'올바른 이메일 주소를 입력하세요.',errPw:'영문과 숫자를 포함해 8자 이상 입력하세요.',errPw2:'비밀번호가 일치하지 않습니다.',toastRegistered:'가입이 완료되었습니다',
+  fgTitle:'비밀번호 재설정',fgH:'재설정 메일 보내기',fgSub:'등록된 이메일로 비밀번호 재설정 링크를 보내드립니다.',btnSend:'재설정 메일 전송',
+  fgDoneB:'✓ 전송했습니다 (시제품)',fgDoneBody:'등록 이메일로 재설정 링크를 보낸 것으로 가정합니다. 실제 버전에서는 여기서 새 비밀번호를 설정할 수 있습니다.',
+  gateTitle:'이용약관 동의',gateH:'이용 전에',gateSub:'서비스를 이용하려면 이용약관에 동의해야 합니다.',gateCheck:'이용약관을 확인하고 동의합니다.',gateGo:'동의하고 진행',
+  homeSub:'오늘도 이용해 주셔서 감사합니다.',homeHello:'{id}님, 안녕하세요',
+  mBikesT:'렌탈 자전거 목록',mBikesS:'빌릴 수 있는 자전거 보기',mCertT:'렌탈 중 증명서',mCertS:'현재 빌린 자전거',mAmtT:'이번 달 이용 금액',mAmtS:'이번 달 결제 예정',mNewsT:'매장 공지',mNewsS:'최신 정보·캠페인',mTermsT:'이용약관',mTermsS:'서비스 약관 확인',
+  bikesTitle:'렌탈 자전거 목록',badgeRenting:'렌탈 중',badgeSoldout:'재고 없음',toastLocked:'렌탈 중이거나 재고가 없습니다',perMonth:'/월',emptyBikes:'현재 이용 가능한 자전거가 없습니다.',
+  detailTitle:'자전거 상세',perMonthTax:'/월 (세금 포함)',maintIncluded:'정비·점검 비용 포함',specFeature:'특징',specPrice:'월 요금',specStock:'재고',stockNone:'없음',btnApplyThis:'이 자전거 렌탈 신청',
+  applyTitle:'렌탈 신청',applyH:'{name} 신청',applyHFallback:'신청 내용',applySub:'본인 정보를 입력하세요.',labelName:'이름',phName:'홍길동',labelBirth:'생년월일',labelAddr:'주소',phAddr:'〇〇시 〇〇구…',labelTel:'전화번호',labelIdDoc:'신분증 촬영',idCam:'카메라로 신분증 촬영',btnToPayment:'결제 정보 등록으로 진행',errAllFields:'모든 항목을 입력하세요.',errIdPhoto:'신분증을 촬영하세요.',
+  gmoTitle:'결제 정보 등록',gmoSecure:'🔒 SSL 보호',gmoLinktype:'링크타입Plus (카드 결제)',labelCard:'카드 번호',labelExp:'유효기간',labelCvc:'보안 코드',labelHolder:'카드 명의',btnConfirmRental:'등록하고 렌탈 확정',gmoNote:'※ 시제품입니다. 실제 결제는 이루어지지 않습니다. 실제 버전에서는 GMO 보안 화면으로 이동합니다.',toastCard:'카드 정보를 입력하세요',
+  successTitle:'신청 완료',successH:'렌탈이 확정되었습니다',successSub:'고객님의 렌탈 ID는 다음과 같습니다.',btnViewCert:'렌탈 증명서 보기',btnToHome:'홈으로 돌아가기',
+  certTitle:'렌탈 중 증명서',emptyCert:'현재 렌탈 중인 자전거가 없습니다.',certStart:'렌탈 시작일',certBikename:'자전거 이름',certSpec:'사양',certPrice:'월 요금',certHolder:'계약자',
+  amountTitle:'이번 달 이용 금액',emptyAmount:'이번 달 이용 내역이 없습니다.',amountLabel:'{y}년 {m}월 결제 예정',amountVia:'GMO 카드 결제(링크타입Plus)로 청구',amountTotal:'합계',
+  newsTitle:'매장 공지',emptyNews:'현재 공지가 없습니다.',newsToYou:'회원님께',termsTitle:'이용약관',logoutConfirm:'로그아웃하시겠습니까?'}
+};
+const LANGS=[['ja','日本語'],['en','English'],['zh','中文'],['ko','한국어']];
+let LANG=DB.get(K.lang,'ja'); if(!T[LANG])LANG='ja';
+function t(key,vars){let s=(T[LANG]&&T[LANG][key]!=null)?T[LANG][key]:(T.ja[key]||key);if(vars)for(const k in vars)s=s.replace('{'+k+'}',vars[k]);return s;}
+function stockText(n){return LANG==='en'?(n+' units'):LANG==='ko'?(n+'대'):(n+'台');}
+
+/* ---------- 種データ ---------- */
+function seed(){
+  if(!DB.get(K.bikes)){
+    DB.set(K.bikes,[
+      {id:'BK01',name:'Vianova City 7',emoji:'🚲',specShort:'7段変速 / 27インチ / 軽量アルミ',specLong:'通勤通学にぴったりのシティクロス。7段変速で坂道も快適。LEDライト・カゴ標準装備。',priceMonthly:3800,frameNo:'VN-CITY-0001',insurance:'2027-03-31',stock:4,note:'',photos:[],rented:false},
+      {id:'BK02',name:'Vianova E-Power',emoji:'⚡',specShort:'電動アシスト / 走行60km / 大容量バッテリー',specLong:'坂道もすいすい進む電動アシスト。1回の充電で約60km。買い物にも通勤にも。',priceMonthly:7200,frameNo:'VN-EP-0002',insurance:'2027-05-31',stock:2,note:'',photos:[],rented:false},
+      {id:'BK03',name:'Vianova Mini Fold',emoji:'🛴',specShort:'折りたたみ / 20インチ / 輪行可',specLong:'コンパクトに折りたためる人気モデル。電車との組み合わせや車載にも便利。',priceMonthly:4500,frameNo:'VN-MF-0003',insurance:'2027-01-31',stock:3,note:'',photos:[],rented:false},
+      {id:'BK04',name:'Vianova Road S',emoji:'🚴',specShort:'ロードバイク / 16段変速 / カーボン',specLong:'軽量カーボンフレームの本格ロード。週末のロングライドにおすすめ。',priceMonthly:9800,frameNo:'VN-RD-0004',insurance:'2027-08-31',stock:1,note:'',photos:[],rented:false}
+    ]);
+  }
+  if(!DB.get(K.terms))DB.set(K.terms,`■故障・破損
+1 レンタル品について、故障または破損した場合は、直ちに使用を中止し、当店まで連絡してください。
+2 利用者の責に帰すべき事由により、レンタル品を故障または破損した場合、損害金額を利用者に請求する場合があります。
+■事故
+1 レンタサイクル利用中の事故につきましては、各自の責任でお願いいたします。
+2 事故に会われた場合は速やかに警察と当店に連絡してください。
+3 レンタサイクル利用時の障害等につきましては、本施設加入の保険運用の保障範囲内で保障しますが、適応外の損害におきましては利用者自らの責任で行っていただきます。
+■盗難・紛失
+利用者の責に帰すべき事由により、レンタル品を盗難または紛失した場合、損害金額を利用者に請求する場合があります。
+■禁止行為
+1 無謀な運転、酒気帯び運転、その他交通規則に違反する行為。
+2 危険個所、不適当な場所または方法での使用。歩行者等の通行妨害となる行為。
+3 自転車放置禁止区域内及び通行の妨げとなるような場所での駐車。
+4 利用者以外の第三者に使用させる事。
+5 その他、法令諸規則に反する行為。(当店は一切の責任を負いかねます。)
+6 ルールブックをよく読んで理解してから乗車して下さい。`);
+  if(!DB.get(K.news))DB.set(K.news,[
+    {id:'N1',date:'2026-06-01',title:'夏のメンテナンスキャンペーン',body:'7月末まで、無料点検をご希望の会員さま全員にタイヤ空気圧チェック＆チェーン注油を実施中です。お気軽にご来店ください。',target:''},
+    {id:'N2',date:'2026-05-15',title:'電動アシストモデル入荷',body:'人気のVianova E-Powerを追加入荷しました。台数に限りがございますのでお早めに。',target:''}
+  ]);
+}
+seed();
+
+/* ---------- i18n適用 ---------- */
+function applyI18n(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-toggle]').forEach(btn=>{const f=document.getElementById(btn.dataset.toggle);btn.textContent=(f&&f.type!=='password')?t('hide'):t('show');});
+  document.querySelectorAll('[data-langsel]').forEach(s=>s.value=LANG);
+}
+function setLang(l){if(!T[l])return;LANG=l;DB.set(K.lang,l);applyI18n();onEnter(navStack[navStack.length-1]);}
+
+/* ---------- 言語セレクター挿入 ---------- */
+function makeLangSelect(dark){
+  const s=document.createElement('select');
+  s.className='lang-select'+(dark?' dark':'');s.setAttribute('data-langsel','');
+  LANGS.forEach(([v,n])=>{const o=document.createElement('option');o.value=v;o.textContent=n;s.appendChild(o);});
+  s.value=LANG;s.onchange=e=>setLang(e.target.value);
+  return s;
+}
+function installLangSelectors(){
+  document.querySelector('#s-login .hero-top').appendChild(makeLangSelect(false));
+  document.querySelectorAll('.topbar').forEach(tb=>{
+    if(!tb.querySelector('.spacer')){const sp=document.createElement('span');sp.className='spacer';tb.appendChild(sp);}
+    tb.appendChild(makeLangSelect(false));
+  });
+}
+
+/* ---------- ナビゲーション ---------- */
+let navStack=['s-login'];
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo(0,0);}
+function nav(id){navStack.push(id);showScreen(id);onEnter(id);}
+function back(){if(navStack.length>1){navStack.pop();const id=navStack[navStack.length-1];showScreen(id);onEnter(id);}}
+function resetTo(id){navStack=[id];showScreen(id);onEnter(id);}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-back]'))back();
+  const g=e.target.closest('[data-go]');if(g)nav(g.dataset.go);
+  const tg=e.target.closest('[data-toggle]');if(tg){const f=document.getElementById(tg.dataset.toggle);const on=f.type==='password';f.type=on?'text':'password';tg.textContent=on?t('hide'):t('show');}
+});
+
+function onEnter(id){
+  if(id==='s-gate')document.getElementById('gate-terms').textContent=DB.get(K.terms,'');
+  if(id==='s-home')renderHome();
+  if(id==='s-bikes')renderBikes();
+  if(id==='s-bike')renderBikeDetail();
+  if(id==='s-apply')document.getElementById('apply-bikename').textContent=applyHeading();
+  if(id==='s-cert')renderCert();
+  if(id==='s-amount')renderAmount();
+  if(id==='s-news')renderNews();
+  if(id==='s-terms')document.getElementById('terms-body').textContent=DB.get(K.terms,'');
+}
+
+let toastT;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* ---------- バリデーション ---------- */
+const reAlnum=s=>/^[A-Za-z0-9]+$/.test(s);
+const reEmail=s=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+function validPw(s){return s.length>=8&&/[A-Za-z]/.test(s)&&/[0-9]/.test(s);} // 記号も許可
+
+/* ---------- ログイン ---------- */
+document.getElementById('li-toreg').onclick=()=>nav('s-register');
+document.getElementById('li-forgot').onclick=()=>nav('s-forgot');
+document.getElementById('li-go').onclick=()=>{
+  const id=document.getElementById('li-id').value.trim();
+  const pw=document.getElementById('li-pw').value;
+  const err=document.getElementById('li-err');err.textContent='';
+  const u=DB.get(K.users,[]).find(x=>x.memberId===id);
+  if(!u||u.password!==pw){err.textContent=t('loginErr');return;}
+  DB.set(K.session,id);
+  document.getElementById('gate-check').checked=false;
+  document.getElementById('gate-go').disabled=true;
+  resetTo('s-gate');
+};
+
+/* ---------- 新規登録 ---------- */
+document.getElementById('rg-go').onclick=()=>{
+  const id=document.getElementById('rg-id').value.trim();
+  const email=document.getElementById('rg-email').value.trim();
+  const pw=document.getElementById('rg-pw').value;
+  const pw2=document.getElementById('rg-pw2').value;
+  let ok=true;const set=(el,msg)=>{document.getElementById(el).textContent=msg;if(msg)ok=false;};
+  set('rg-id-err','');set('rg-email-err','');set('rg-pw-err','');set('rg-pw2-err','');
+  const users=DB.get(K.users,[]);
+  if(!id)set('rg-id-err',t('errIdReq'));
+  else if(!reAlnum(id))set('rg-id-err',t('errIdAlnum'));
+  else if(id.length>12)set('rg-id-err',t('errIdLen'));
+  else if(users.some(u=>u.memberId===id))set('rg-id-err',t('errIdTaken'));
+  if(!reEmail(email))set('rg-email-err',t('errEmail'));
+  if(!validPw(pw))set('rg-pw-err',t('errPw'));
+  if(pw!==pw2)set('rg-pw2-err',t('errPw2'));
+  if(!ok)return;
+  users.push({memberId:id,email,password:pw,createdAt:new Date().toISOString()});
+  DB.set(K.users,users);
+  toast(t('toastRegistered'));
+  ['rg-id','rg-email','rg-pw','rg-pw2'].forEach(x=>document.getElementById(x).value='');
+  back();
+};
+
+/* ---------- パスワード再設定 ---------- */
+document.getElementById('fg-go').onclick=()=>{
+  const email=document.getElementById('fg-email').value.trim();
+  const err=document.getElementById('fg-err');err.textContent='';
+  if(!reEmail(email)){err.textContent=t('errEmail');return;}
+  document.getElementById('fg-done').style.display='block';
+};
+
+/* ---------- 規約ゲート ---------- */
+document.getElementById('gate-check').onchange=e=>document.getElementById('gate-go').disabled=!e.target.checked;
+document.getElementById('gate-go').onclick=()=>resetTo('s-home');
+
+/* ---------- ホーム ---------- */
+function currentUser(){const id=DB.get(K.session);return DB.get(K.users,[]).find(u=>u.memberId===id);}
+function renderHome(){const u=currentUser();document.getElementById('home-hello').textContent=u?t('homeHello',{id:u.memberId}):t('loginH');}
+document.getElementById('home-logout').onclick=()=>{if(confirm(t('logoutConfirm'))){localStorage.removeItem(K.session);document.getElementById('li-id').value='';document.getElementById('li-pw').value='';resetTo('s-login');}};
+
+/* ---------- 自転車一覧 ---------- */
+function bikePhoto(b,cls){return (b.photos&&b.photos[0])?`<img class="${cls}" src="${b.photos[0]}" alt="">`:`<div class="${cls}">${b.emoji||'🚲'}</div>`;}
+function renderBikes(){
+  const wrap=document.getElementById('bikes-list');
+  const bikes=DB.get(K.bikes,[]);
+  const rentedIds=myActiveRentals().map(r=>r.bikeId);
+  if(!bikes.length){wrap.innerHTML=`<div class="empty"><div class="em-ic">🚲</div><p>${t('emptyBikes')}</p></div>`;return;}
+  wrap.innerHTML=bikes.map(b=>{
+    const iRent=rentedIds.includes(b.id);
+    const soldOut=(b.stock||0)<=0&&!iRent;
+    const disabled=iRent||soldOut;
+    const badge=iRent?`<span class="badge">${t('badgeRenting')}</span>`:(soldOut?`<span class="badge">${t('badgeSoldout')}</span>`:'');
+    return `<div class="bike ${disabled?'disabled':''}" data-bike="${b.id}" ${disabled?'data-locked="1"':''}>
+      ${badge}${bikePhoto(b,'photo')}
+      <div class="info"><b>${b.name}</b><div class="spec">${b.specShort||''}</div>
+      <div class="price">¥${(b.priceMonthly||0).toLocaleString()}<small> ${t('perMonth')}</small></div></div></div>`;
+  }).join('');
+  wrap.querySelectorAll('.bike').forEach(el=>el.onclick=()=>{if(el.dataset.locked){toast(t('toastLocked'));return;}selectedBikeId=el.dataset.bike;nav('s-bike');});
+}
+
+/* ---------- 自転車詳細 ---------- */
+let selectedBikeId=null;
+function renderBikeDetail(){
+  const b=DB.get(K.bikes,[]).find(x=>x.id===selectedBikeId);if(!b)return;
+  const gallery=(b.photos&&b.photos.length)?b.photos.map(p=>`<div class="g"><img class="g" src="${p}" alt=""></div>`).join(''):`<div class="g">${b.emoji||'🚲'}</div>`;
+  document.getElementById('bike-detail').innerHTML=`
+    <div class="gallery">${gallery}</div>
+    <h2 style="margin-top:16px">${b.name}</h2>
+    <p class="sub">${b.specShort||''}</p>
+    <div class="card"><div class="big-amount">¥${(b.priceMonthly||0).toLocaleString()}<small> ${t('perMonthTax')}</small></div>
+      <p style="font-size:13px;color:var(--muted);margin:6px 0 0">${t('maintIncluded')}</p></div>
+    <div class="card"><table class="spectable">
+      <tr><td>${t('specFeature')}</td><td>${b.specLong||b.specShort||'—'}</td></tr>
+      <tr><td>${t('specPrice')}</td><td>¥${(b.priceMonthly||0).toLocaleString()} ${t('perMonth')}</td></tr>
+      <tr><td>${t('specStock')}</td><td>${b.stock>0?stockText(b.stock):t('stockNone')}</td></tr>
+    </table></div>
+    <button class="btn btn-primary" id="bd-apply" style="margin-top:8px">${t('btnApplyThis')}</button>`;
+  document.getElementById('bd-apply').onclick=()=>startApply();
+}
+
+/* ---------- レンタル申込 ---------- */
+function applyHeading(){const b=DB.get(K.bikes,[]).find(x=>x.id===selectedBikeId);return b?t('applyH',{name:b.name}):t('applyHFallback');}
+function startApply(){
+  ['ap-name','ap-addr','ap-tel'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('ap-birth').value='';
+  document.getElementById('ap-idprev').style.display='none';idPhotoData=null;
+  document.getElementById('ap-err').textContent='';
+  nav('s-apply');
+}
+let idPhotoData=null;
+document.getElementById('ap-idbtn').onclick=()=>document.getElementById('ap-idfile').click();
+document.getElementById('ap-idfile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{idPhotoData=r.result;document.getElementById('ap-idimg').src=idPhotoData;document.getElementById('ap-idprev').style.display='block';};r.readAsDataURL(f);};
+document.getElementById('ap-go').onclick=()=>{
+  const name=document.getElementById('ap-name').value.trim();
+  const birth=document.getElementById('ap-birth').value;
+  const addr=document.getElementById('ap-addr').value.trim();
+  const tel=document.getElementById('ap-tel').value.trim();
+  const err=document.getElementById('ap-err');err.textContent='';
+  if(!name||!birth||!addr||!tel){err.textContent=t('errAllFields');return;}
+  if(!idPhotoData){err.textContent=t('errIdPhoto');return;}
+  applyData={name,birth,addr,tel,idPhoto:idPhotoData};
+  ['gmo-num','gmo-exp','gmo-cvc','gmo-name'].forEach(x=>document.getElementById(x).value='');
+  nav('s-gmo');
+};
+let applyData=null;
+document.getElementById('gmo-go').onclick=()=>{
+  const num=document.getElementById('gmo-num').value.replace(/\s/g,'');
+  const exp=document.getElementById('gmo-exp').value.trim();
+  const cvc=document.getElementById('gmo-cvc').value.trim();
+  const nm=document.getElementById('gmo-name').value.trim();
+  if(num.length<12||!exp||cvc.length<3||!nm){toast(t('toastCard'));return;}
+  confirmRental();
+};
+function genRentalId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];const used=DB.get(K.rentals,[]).map(r=>r.rentalId);return used.includes(s)?genRentalId():s;}
+function confirmRental(){
+  const b=DB.get(K.bikes,[]).find(x=>x.id===selectedBikeId);
+  const rid=genRentalId();
+  const rentals=DB.get(K.rentals,[]);
+  rentals.push({rentalId:rid,memberId:DB.get(K.session),bikeId:b.id,bikeName:b.name,specShort:b.specShort,priceMonthly:b.priceMonthly,customerName:applyData.name,birthdate:applyData.birth,address:applyData.addr,phone:applyData.tel,idPhoto:applyData.idPhoto,startedAt:new Date().toISOString()});
+  DB.set(K.rentals,rentals);
+  const bikes=DB.get(K.bikes,[]);const bi=bikes.find(x=>x.id===b.id);if(bi)bi.stock=Math.max(0,(bi.stock||1)-1);DB.set(K.bikes,bikes);
+  document.getElementById('suc-rid').textContent=rid;
+  document.getElementById('suc-bike').textContent=`${b.name} ／ ¥${(b.priceMonthly||0).toLocaleString()} ${t('perMonth')}`;
+  resetTo('s-home');nav('s-success');
+}
+document.getElementById('suc-cert').onclick=()=>{navStack=['s-home'];nav('s-cert');};
+document.getElementById('suc-home').onclick=()=>resetTo('s-home');
+
+/* ---------- 証明書 ---------- */
+function myActiveRentals(){const me=DB.get(K.session);return DB.get(K.rentals,[]).filter(r=>r.memberId===me);}
+function fmtDate(iso){const d=new Date(iso);if(isNaN(d))return iso;const y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+  if(LANG==='ja')return `${y}年${m}月${day}日`;if(LANG==='zh')return `${y}年${m}月${day}日`;if(LANG==='ko')return `${y}년 ${m}월 ${day}일`;
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function renderCert(){
+  const wrap=document.getElementById('cert-list');const list=myActiveRentals();
+  if(!list.length){wrap.innerHTML=`<div class="empty"><div class="em-ic">📄</div><p>${t('emptyCert')}</p></div>`;return;}
+  wrap.innerHTML=list.map(r=>`<div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span class="badge ok" style="position:static">${t('badgeRenting')}</span>
+      <span style="font-family:'Outfit';font-weight:700;letter-spacing:.06em;color:var(--ink)">${r.rentalId}</span></div>
+    <h2 style="margin:4px 0">${r.bikeName}</h2>
+    <table class="spectable">
+      <tr><td>${t('certStart')}</td><td>${fmtDate(r.startedAt)}</td></tr>
+      <tr><td>${t('certBikename')}</td><td>${r.bikeName}</td></tr>
+      <tr><td>${t('certSpec')}</td><td>${r.specShort||'—'}</td></tr>
+      <tr><td>${t('certPrice')}</td><td>¥${(r.priceMonthly||0).toLocaleString()} ${t('perMonth')}</td></tr>
+      <tr><td>${t('certHolder')}</td><td>${r.customerName}</td></tr>
+    </table></div>`).join('');
+}
+
+/* ---------- 今月の利用金額 ---------- */
+function renderAmount(){
+  const list=myActiveRentals();const total=list.reduce((s,r)=>s+(r.priceMonthly||0),0);const now=new Date();
+  const body=document.getElementById('amount-body');
+  if(!list.length){body.innerHTML=`<div class="empty"><div class="em-ic">💴</div><p>${t('emptyAmount')}</p></div>`;return;}
+  body.innerHTML=`<div class="card" style="text-align:center;padding:26px">
+      <p class="sub" style="margin:0 0 8px">${t('amountLabel',{y:now.getFullYear(),m:now.getMonth()+1})}</p>
+      <div class="big-amount">¥${total.toLocaleString()}</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">${t('amountVia')}</p></div>
+    <div class="card"><table class="spectable">
+      ${list.map(r=>`<tr><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()} ${t('perMonth')}</td></tr>`).join('')}
+      <tr><td style="font-weight:700;color:var(--ink)">${t('amountTotal')}</td><td style="color:var(--accent-press)">¥${total.toLocaleString()}</td></tr>
+    </table></div>`;
+}
+
+/* ---------- お知らせ ---------- */
+function renderNews(){
+  const me=DB.get(K.session);const wrap=document.getElementById('news-list');
+  const list=DB.get(K.news,[]).filter(n=>!n.target||n.target===me).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!list.length){wrap.innerHTML=`<div class="empty"><div class="em-ic">📣</div><p>${t('emptyNews')}</p></div>`;return;}
+  wrap.innerHTML=list.map(n=>`<div class="news-item">
+    <div class="date">${(n.date||'').replace(/-/g,'.')}${n.target?' ・ '+t('newsToYou'):''}</div>
+    <h3>${n.title}</h3><p>${n.body}</p></div>`).join('');
+}
+
+/* ---------- 起動 ---------- */
+installLangSelectors();
+applyI18n();
+resetTo('s-login');
+</script>
+</body>
+</html>

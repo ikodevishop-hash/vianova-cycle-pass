@@ -1,0 +1,22 @@
+{
+  "name": "vianova-cycle-pass-server",
+  "version": "1.0.0",
+  "description": "Vianova Cycle Pass — API server (Node + SQLite + mail) for the native app and web admin.",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.4.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.16"
+  }
+}

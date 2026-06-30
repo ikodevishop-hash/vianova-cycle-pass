@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Vianova Cycle Pass",
+    "slug": "vianova-cycle-pass",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vianovacyclepass",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "primaryColor": "#15B981",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vianova.cyclepass",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "本人確認書類を撮影するためにカメラを使用します。",
+        "NSPhotoLibraryUsageDescription": "本人確認書類の画像を選択するために写真ライブラリを使用します。",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "android": {
+      "package": "com.vianova.cyclepass",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "本人確認書類の画像を選択するために写真ライブラリにアクセスします。",
+          "cameraPermission": "本人確認書類を撮影するためにカメラを使用します。"
+        }
+      ]
+    ],
+    "extra": {
+      "appKind": "user",
+      "apiUrl": "http://localhost:4080"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const Database = require('better-sqlite3');
+const bcrypt = require('bcryptjs');
+const config = require('./config');
+const { SEED_BIKES, SEED_NEWS, SEED_TERMS } = require('./seed');
+
+fs.mkdirSync(config.dataDir, { recursive: true });
+const db = new Database(path.join(config.dataDir, 'vianova.db'));
+db.pragma('journal_mode = WAL');
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    member_id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    email_verified INTEGER NOT NULL DEFAULT 0,
+    verify_token TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS bikes (
+    id TEXT PRIMARY KEY,
+    name TEXT, emoji TEXT, spec_short TEXT, spec_long TEXT,
+    price_monthly INTEGER, frame_no TEXT, insurance TEXT,
+    stock INTEGER, note TEXT, photos TEXT
+  );
+  CREATE TABLE IF NOT EXISTS rentals (
+    rental_id TEXT PRIMARY KEY,
+    member_id TEXT, bike_id TEXT, bike_name TEXT, spec_short TEXT,
+    price_monthly INTEGER, customer_name TEXT, birthdate TEXT,
+    address TEXT, phone TEXT, id_photo TEXT, started_at TEXT
+  );
+  CREATE TABLE IF NOT EXISTS news (
+    id TEXT PRIMARY KEY, date TEXT, title TEXT, body TEXT, target TEXT
+  );
+  CREATE TABLE IF NOT EXISTS terms (
+    lang TEXT PRIMARY KEY, text TEXT
+  );
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY, value TEXT
+  );
+`);
+
+// ----- first-run seeding -----
+const seedBikes = db.transaction(() => {
+  const ins = db.prepare(`INSERT INTO bikes
+    (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,stock,note,photos)
+    VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@stock,@note,@photos)`);
+  for (const b of SEED_BIKES) ins.run(b);
+});
+if (db.prepare('SELECT COUNT(*) c FROM bikes').get().c === 0) seedBikes();
+
+const seedNews = db.transaction(() => {
+  const ins = db.prepare('INSERT INTO news (id,date,title,body,target) VALUES (@id,@date,@title,@body,@target)');
+  for (const n of SEED_NEWS) ins.run(n);
+});
+if (db.prepare('SELECT COUNT(*) c FROM news').get().c === 0) seedNews();
+
+const seedTerms = db.transaction(() => {
+  const ins = db.prepare('INSERT OR IGNORE INTO terms (lang,text) VALUES (?,?)');
+  for (const [lang, text] of Object.entries(SEED_TERMS)) ins.run(lang, text);
+});
+seedTerms();
+
+// Admin password (hashed) — seeded once.
+if (!db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_hash')) {
+  db.prepare('INSERT INTO settings (key,value) VALUES (?,?)').run(
+    'admin_password_hash',
+    bcrypt.hashSync(config.adminPassword, 10),
+  );
+}
+
+module.exports = db;

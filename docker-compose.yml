@@ -1,0 +1,54 @@
+# VPS + Docker + HTTPS で公開する構成。
+# Caddy がドメインの Let's Encrypt 証明書を自動取得・更新します。
+#
+# 使い方:
+#   1. DNS で  あなたのドメイン → VPSのグローバルIP  を設定
+#   2. このフォルダで:
+#        DOMAIN=vianova.example.com docker compose up -d --build
+#   3. https://あなたのドメイン/admin/   … 管理画面
+#      https://あなたのドメイン/health   … 稼働確認
+#   4. アプリの「サーバー接続設定」に https://あなたのドメイン を設定
+#
+# メール確認リンクはリクエストの実ホスト(https://あなたのドメイン)から自動生成されます。
+# 実送信するなら SMTP_* を、まず試すなら MAIL_MODE=ethereal を環境変数/.env で渡してください。
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: 4080
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-master123}
+      DATA_DIR: /data
+      MAIL_MODE: ${MAIL_MODE:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: "${SMTP_FROM:-Vianova Cycle Pass <no-reply@vianova.example>}"
+    volumes:
+      - api-data:/data
+    expose:
+      - "4080"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: "${DOMAIN:?set DOMAIN e.g. vianova.example.com}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  api-data:
+  caddy-data:
+  caddy-config:

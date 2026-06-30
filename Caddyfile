@@ -1,0 +1,6 @@
+# Caddy: ドメインのHTTPSを自動取得し、APIコンテナへリバースプロキシする。
+# DOMAIN は docker-compose 経由で環境変数として渡されます。
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy api:4080
+}

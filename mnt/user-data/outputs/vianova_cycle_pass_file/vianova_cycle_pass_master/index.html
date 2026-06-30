@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vianova Cycle Pass — 管理マスター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F2E33; --ink2:#1C4F57; --bg:#EEF1ED; --panel:#FFFFFF;
+    --accent:#15B981; --accent-press:#0E9468; --persimmon:#E8643C;
+    --text:#16201F; --muted:#62716F; --line:#E2E6DF; --line2:#EDEFEA;
+    --radius:14px; --radius-sm:10px; --shadow:0 6px 24px rgba(15,46,51,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Noto Sans JP",system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  button,input,textarea,select{font-family:inherit}
+
+  /* ===== login ===== */
+  .login-wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#0F2E33,#1C4F57);padding:20px}
+  .login-card{background:#fff;border-radius:20px;padding:40px 34px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .login-card .brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .mark{width:42px;height:42px;border-radius:11px;background:var(--accent);position:relative;flex:0 0 auto}
+  .mark::before,.mark::after{content:"";position:absolute;border:2.5px solid #fff;border-radius:50%;width:11px;height:11px;bottom:8px}
+  .mark::before{left:6px}.mark::after{right:6px}
+  .login-card .bname{font-family:"Outfit",sans-serif;font-weight:700;font-size:18px;line-height:1.1}
+  .login-card .bname small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:600}
+  .login-card h1{font-size:20px;margin:0 0 4px}
+  .login-card .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  .tag{display:inline-block;background:#FCEAE3;color:var(--persimmon);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:18px}
+
+  label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--ink)}
+  .field{position:relative}
+  input[type=text],input[type=password],input[type=tel],input[type=date],input[type=number],input[type=email],textarea,select{
+    width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-size:14.5px;background:#fff;color:var(--text);transition:border-color .15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:90px;line-height:1.7}
+  .with-toggle input{padding-right:62px}
+  .toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--ink2);font-weight:700;font-size:12px;padding:8px;cursor:pointer}
+  .err{font-size:12px;color:var(--persimmon);margin-top:6px;font-weight:600;min-height:1px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border:0;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:transform .05s,background .15s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:active{background:var(--accent-press)}
+  .btn-ink{background:var(--ink);color:#fff}
+  .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-danger{background:#fff;color:var(--persimmon);border:1.5px solid #F2C9BC}
+  .btn-block{width:100%}
+  .btn-sm{padding:8px 13px;font-size:13px}
+
+  /* ===== app shell ===== */
+  .shell{display:none;min-height:100vh}
+  .shell.on{display:grid;grid-template-columns:248px 1fr}
+  .side{background:var(--ink);color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  .side .brand{display:flex;align-items:center;gap:11px;margin-bottom:24px;padding:0 6px}
+  .side .bname{font-family:"Outfit",sans-serif;font-weight:700;font-size:16px;line-height:1.1;color:#fff}
+  .side .bname small{display:block;font-size:9px;letter-spacing:.18em;color:rgba(255,255,255,.6);font-weight:600}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;border:0;background:transparent;width:100%;text-align:left}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav-item.active{background:var(--accent);color:#fff;font-weight:700}
+  .nav-item .ic{font-size:18px;width:22px;text-align:center}
+  .side .foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+  .side .logout{color:rgba(255,255,255,.7);font-size:13px;background:transparent;border:0;cursor:pointer;padding:10px 14px;width:100%;text-align:left;border-radius:11px}
+  .side .logout:hover{background:rgba(255,255,255,.08);color:#fff}
+
+  .main{padding:0;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 28px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .back{appearance:none;border:1.5px solid var(--line);background:#fff;width:38px;height:38px;border-radius:10px;font-size:20px;cursor:pointer;color:var(--ink);display:grid;place-items:center}
+  .back:hover{border-color:var(--accent)}
+  .topbar h1{font-size:19px;margin:0}
+  .topbar .crumb{color:var(--muted);font-size:13px}
+  .content{padding:26px 28px 50px;flex:1;max-width:1100px;width:100%}
+
+  .view{display:none}.view.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.view.active{animation:none}}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel+.panel{margin-top:18px}
+  .panel .ph{padding:18px 20px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .panel .ph h2{font-size:16px;margin:0}
+  .panel .pb{padding:20px}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .stat .lab{font-size:12.5px;color:var(--muted);font-weight:600}
+  .stat .num{font-family:"Outfit",sans-serif;font-size:30px;font-weight:700;color:var(--ink);margin-top:4px}
+  .stat .num small{font-size:14px;color:var(--muted)}
+
+  /* dashboard menu cards */
+  .dash{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .dash-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;cursor:pointer;box-shadow:var(--shadow);text-align:left;display:flex;gap:16px;align-items:flex-start}
+  .dash-card:hover{border-color:var(--accent)}
+  .dash-card .ic{width:52px;height:52px;border-radius:13px;background:#EAF7F1;color:var(--accent-press);display:grid;place-items:center;font-size:25px;flex:0 0 auto}
+  .dash-card h3{margin:0 0 5px;font-size:16.5px;color:var(--ink)}
+  .dash-card p{margin:0;font-size:13px;color:var(--muted)}
+
+  /* table */
+  .table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .table th{text-align:left;padding:12px 14px;background:#F6F8F5;color:var(--muted);font-weight:700;font-size:12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:12px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .table tr:last-child td{border-bottom:0}
+  .table tbody tr.click{cursor:pointer}
+  .table tbody tr.click:hover{background:#F6FBF8}
+  .mono{font-family:"Outfit",monospace;font-weight:700;letter-spacing:.04em;color:var(--ink)}
+  .chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700}
+  .chip.green{background:#E7F6EF;color:var(--accent-press)}
+  .chip.gray{background:#EEF0EC;color:var(--muted)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid2 .full{grid-column:1/-1}
+  .row-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+  .empty{text-align:center;color:var(--muted);padding:46px 20px}
+  .empty .em-ic{font-size:42px;opacity:.5}.empty p{margin:10px 0 0}
+
+  /* photo uploads */
+  .photos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .photo-slot{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:11px;background:#FAFBF9;display:grid;place-items:center;cursor:pointer;overflow:hidden;position:relative;color:var(--muted);font-size:24px}
+  .photo-slot img{width:100%;height:100%;object-fit:cover}
+  .photo-slot .rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+
+  /* detail */
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:0}
+  .kv .k{padding:11px 0;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line2)}
+  .kv .v{padding:11px 0;font-size:14px;font-weight:600;border-bottom:1px solid var(--line2);color:var(--ink);word-break:break-all}
+  .idphoto{max-width:280px;border-radius:11px;border:1px solid var(--line);margin-top:8px}
+
+  .modal{position:fixed;inset:0;background:rgba(15,46,51,.4);display:none;place-items:center;z-index:50;padding:20px}
+  .modal.on{display:grid}
+  .modal .box{background:#fff;border-radius:16px;max-width:480px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 4px}
+
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--ink);color:#fff;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transform:translateY(12px);transition:.25s;z-index:100;pointer-events:none}
+  .toast.show{opacity:1;transform:none}
+
+  @media(max-width:900px){
+    .shell.on{grid-template-columns:1fr}
+    .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;gap:4px}
+    .side .brand{width:100%}.side .foot{margin:0}
+    .nav-item{width:auto}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .dash,.grid2,.kv{grid-template-columns:1fr}
+    .kv .k{border:0;padding-bottom:0}.kv .v{padding-top:2px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="login">
+  <div class="login-card">
+    <div class="brand"><div class="mark"></div><div class="bname">Vianova<small>CYCLE PASS</small></div></div>
+    <span class="tag">管理マスター</span>
+    <h1>マスターログイン</h1>
+    <p class="sub">管理者パスワードを入力してください。</p>
+    <label>パスワード</label>
+    <div class="field with-toggle">
+      <input type="password" id="m-pw" placeholder="パスワード">
+      <button class="toggle" type="button" data-toggle="m-pw">表示</button>
+    </div>
+    <div class="err" id="m-err"></div>
+    <button class="btn btn-primary btn-block" id="m-go" style="margin-top:18px">ログイン</button>
+    <p class="hint" style="margin-top:14px">試作版の初期パスワード：<b>master123</b></p>
+  </div>
+</div>
+
+<!-- ===== SHELL ===== -->
+<div class="shell" id="shell">
+  <aside class="side">
+    <div class="brand"><div class="mark"></div><div class="bname">Vianova<small>CYCLE PASS</small></div></div>
+    <button class="nav-item active" data-view="v-dash"><span class="ic">▦</span>ダッシュボード</button>
+    <button class="nav-item" data-view="v-customers"><span class="ic">👤</span>顧客管理</button>
+    <button class="nav-item" data-view="v-bikes"><span class="ic">🚲</span>自転車登録</button>
+    <button class="nav-item" data-view="v-terms"><span class="ic">📑</span>利用規約変更</button>
+    <button class="nav-item" data-view="v-rentals"><span class="ic">📊</span>レンタル状況</button>
+    <div class="foot"><button class="logout" id="m-logout">⎋ ログアウト</button></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="back" id="m-back" style="display:none">‹</button>
+      <div><h1 id="tb-title">ダッシュボード</h1><div class="crumb" id="tb-crumb"></div></div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="v-dash">
+        <div class="stats" id="dash-stats"></div>
+        <div class="dash">
+          <button class="dash-card" data-view="v-customers"><span class="ic">👤</span><div><h3>顧客管理</h3><p>会員情報・本人確認・レンタル状況の確認、お知らせ送信</p></div></button>
+          <button class="dash-card" data-view="v-bikes"><span class="ic">🚲</span><div><h3>自転車登録</h3><p>写真・料金・スペック・車体番号・保険期限などの登録</p></div></button>
+          <button class="dash-card" data-view="v-terms"><span class="ic">📑</span><div><h3>利用規約変更</h3><p>ここでの変更がユーザー版の利用規約に反映されます</p></div></button>
+          <button class="dash-card" data-view="v-rentals"><span class="ic">📊</span><div><h3>レンタル状況</h3><p>レンタル一覧の確認とCSVデータの書き出し</p></div></button>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="view" id="v-customers">
+        <div class="panel">
+          <div class="ph"><h2>顧客一覧</h2><span class="crumb" id="cust-count"></span></div>
+          <div class="pb" style="padding:0"><div id="cust-table"></div></div>
+        </div>
+      </div>
+
+      <!-- CUSTOMER DETAIL -->
+      <div class="view" id="v-cust-detail">
+        <div id="cust-detail-body"></div>
+      </div>
+
+      <!-- BIKES -->
+      <div class="view" id="v-bikes">
+        <div class="panel">
+          <div class="ph"><h2>登録済み自転車</h2><button class="btn btn-primary btn-sm" id="bk-new">＋ 新規登録</button></div>
+          <div class="pb" style="padding:0"><div id="bk-table"></div></div>
+        </div>
+      </div>
+
+      <!-- BIKE FORM -->
+      <div class="view" id="v-bike-form">
+        <div class="panel">
+          <div class="ph"><h2 id="bk-form-title">自転車の登録</h2></div>
+          <div class="pb">
+            <label>自転車の写真（最大4枚）</label>
+            <div class="photos" id="bk-photos"></div>
+            <div class="grid2" style="margin-top:8px">
+              <div><label>自転車名 <span style="color:var(--persimmon)">*</span></label><input type="text" id="bk-name" placeholder="Vianova City 7"></div>
+              <div><label>レンタル代（月額・円） <span style="color:var(--persimmon)">*</span></label><input type="number" id="bk-price" placeholder="3800" min="0"></div>
+              <div class="full"><label>簡単なスペック <span style="color:var(--persimmon)">*</span></label><input type="text" id="bk-specshort" placeholder="7段変速 / 27インチ / 軽量アルミ"></div>
+              <div class="full"><label>詳しいスペック</label><textarea id="bk-speclong" placeholder="フレーム素材、装備、対象用途など"></textarea></div>
+              <div><label>車体番号</label><input type="text" id="bk-frame" placeholder="VN-CITY-0001"></div>
+              <div><label>保険期限</label><input type="date" id="bk-insurance"></div>
+              <div><label>レンタル台数（在庫）</label><input type="number" id="bk-stock" placeholder="4" min="0"></div>
+              <div><label>絵文字アイコン（写真なしの場合）</label><input type="text" id="bk-emoji" placeholder="🚲" maxlength="2"></div>
+              <div class="full"><label>備考</label><textarea id="bk-note" placeholder="メモ・特記事項"></textarea></div>
+            </div>
+            <div class="err" id="bk-err"></div>
+            <div class="row-actions">
+              <button class="btn btn-primary" id="bk-save">保存する</button>
+              <button class="btn btn-ghost" id="bk-cancel">キャンセル</button>
+              <button class="btn btn-danger" id="bk-delete" style="display:none;margin-left:auto">この自転車を削除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERMS -->
+      <div class="view" id="v-terms">
+        <div class="panel">
+          <div class="ph"><h2>利用規約の編集</h2><span class="crumb">保存するとユーザー版に即反映されます</span></div>
+          <div class="pb">
+            <textarea id="terms-edit" style="min-height:420px"></textarea>
+            <div class="row-actions"><button class="btn btn-primary" id="terms-save">変更を保存</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RENTALS -->
+      <div class="view" id="v-rentals">
+        <div class="panel">
+          <div class="ph"><h2>レンタル状況</h2><button class="btn btn-ink btn-sm" id="rt-csv">⬇ CSVデータを書き出す</button></div>
+          <div class="pb" style="padding:0"><div id="rt-table"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- announce modal -->
+<div class="modal" id="modal-news">
+  <div class="box">
+    <h3>お知らせを送信</h3>
+    <p class="sub" id="news-to" style="color:var(--muted);font-size:13px;margin:2px 0 14px"></p>
+    <label>タイトル</label><input type="text" id="news-title" placeholder="例：点検のご案内">
+    <label>本文</label><textarea id="news-body" placeholder="お客様へのメッセージ"></textarea>
+    <div class="row-actions"><button class="btn btn-primary" id="news-send">送信</button><button class="btn btn-ghost" id="news-cancel">閉じる</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Vianova Cycle Pass — 管理マスター版 試作版
+   ユーザー版と同じ localStorage を共有します。
+   （同じブラウザ・同じローカルサーバーで開いた場合）
+   ========================================================= */
+const DB={ get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}, set(k,v){localStorage.setItem(k,JSON.stringify(v));} };
+const K={users:'vcp_users',bikes:'vcp_bikes',rentals:'vcp_rentals',terms:'vcp_terms',news:'vcp_news',master:'vcp_master'};
+if(!DB.get(K.master)) DB.set(K.master,'master123');
+if(!DB.get(K.bikes)) DB.set(K.bikes,[]);
+if(!DB.get(K.terms)) DB.set(K.terms,`■故障・破損
+1 レンタル品について、故障または破損した場合は、直ちに使用を中止し、当店まで連絡してください。
+2 利用者の責に帰すべき事由により、レンタル品を故障または破損した場合、損害金額を利用者に請求する場合があります。
+■事故
+1 レンタサイクル利用中の事故につきましては、各自の責任でお願いいたします。
+2 事故に会われた場合は速やかに警察と当店に連絡してください。
+3 レンタサイクル利用時の障害等につきましては、本施設加入の保険運用の保障範囲内で保障しますが、適応外の損害におきましては利用者自らの責任で行っていただきます。
+■盗難・紛失
+利用者の責に帰すべき事由により、レンタル品を盗難または紛失した場合、損害金額を利用者に請求する場合があります。
+■禁止行為
+1 無謀な運転、酒気帯び運転、その他交通規則に違反する行為。
+2 危険個所、不適当な場所または方法での使用。歩行者等の通行妨害となる行為。
+3 自転車放置禁止区域内及び通行の妨げとなるような場所での駐車。
+4 利用者以外の第三者に使用させる事。
+5 その他、法令諸規則に反する行為。(当店は一切の責任を負いかねます。)
+6 ルールブックをよく読んで理解してから乗車して下さい。`);
+
+/* toast */
+let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* password toggle */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-toggle]');if(t){const f=document.getElementById(t.dataset.toggle);const on=f.type==='password';f.type=on?'text':'password';t.textContent=on?'非表示':'表示';}});
+
+/* ===== login ===== */
+document.getElementById('m-go').onclick=login;
+document.getElementById('m-pw').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+function login(){
+  const pw=document.getElementById('m-pw').value;
+  const err=document.getElementById('m-err');err.textContent='';
+  if(pw!==DB.get(K.master)){ err.textContent='パスワードが正しくありません。'; return; }
+  document.getElementById('login').style.display='none';
+  document.getElementById('shell').classList.add('on');
+  goView('v-dash');
+}
+document.getElementById('m-logout').onclick=()=>{ if(confirm('ログアウトしますか？')){ document.getElementById('m-pw').value=''; document.getElementById('shell').classList.remove('on'); document.getElementById('login').style.display='grid'; } };
+
+/* ===== navigation with back ===== */
+const TITLES={'v-dash':'ダッシュボード','v-customers':'顧客管理','v-cust-detail':'顧客の詳細','v-bikes':'自転車登録','v-bike-form':'自転車の登録','v-terms':'利用規約変更','v-rentals':'レンタル状況'};
+const ROOTVIEWS=['v-dash','v-customers','v-bikes','v-terms','v-rentals'];
+let viewStack=['v-dash'];
+function setActiveNav(view){
+  const navView = ROOTVIEWS.includes(view)?view:(view==='v-cust-detail'?'v-customers':view==='v-bike-form'?'v-bikes':'v-dash');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===navView));
+}
+function render(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  document.getElementById('tb-title').textContent=TITLES[view]||'';
+  document.getElementById('m-back').style.display = ROOTVIEWS.includes(view)?'none':'grid';
+  setActiveNav(view);
+  window.scrollTo(0,0);
+  if(view==='v-dash')renderDash();
+  if(view==='v-customers')renderCustomers();
+  if(view==='v-bikes')renderBikeList();
+  if(view==='v-terms')document.getElementById('terms-edit').value=DB.get(K.terms,'');
+  if(view==='v-rentals')renderRentals();
+}
+function goView(view){ if(ROOTVIEWS.includes(view)) viewStack=[view]; else viewStack.push(view); render(view); }
+function back(){ if(viewStack.length>1){ viewStack.pop(); render(viewStack[viewStack.length-1]); } }
+document.getElementById('m-back').onclick=back;
+document.addEventListener('click',e=>{ const n=e.target.closest('[data-view]'); if(n){ goView(n.dataset.view); } });
+
+/* ===== dashboard ===== */
+function renderDash(){
+  const users=DB.get(K.users,[]),bikes=DB.get(K.bikes,[]),rentals=DB.get(K.rentals,[]);
+  const revenue=rentals.reduce((s,r)=>s+(r.priceMonthly||0),0);
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><div class="lab">会員数</div><div class="num">${users.length}<small> 人</small></div></div>
+    <div class="stat"><div class="lab">登録車種</div><div class="num">${bikes.length}<small> 種</small></div></div>
+    <div class="stat"><div class="lab">レンタル中</div><div class="num">${rentals.length}<small> 件</small></div></div>
+    <div class="stat"><div class="lab">月間売上(予定)</div><div class="num">¥${revenue.toLocaleString()}</div></div>`;
+}
+
+/* ===== customers ===== */
+function bikeName(id){const b=DB.get(K.bikes,[]).find(x=>x.id===id);return b?b.name:'—';}
+function renderCustomers(){
+  const users=DB.get(K.users,[]);const rentals=DB.get(K.rentals,[]);
+  document.getElementById('cust-count').textContent=`${users.length} 名`;
+  const wrap=document.getElementById('cust-table');
+  if(!users.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">👤</div><p>まだ会員が登録されていません。<br>ユーザー版アプリで新規登録するとここに表示されます。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>会員ID</th><th>メール</th><th>レンタル</th><th>登録日</th><th></th></tr></thead><tbody>
+    ${users.map(u=>{const rs=rentals.filter(r=>r.memberId===u.memberId);
+      return `<tr class="click" data-cust="${u.memberId}">
+        <td class="mono">${u.memberId}</td>
+        <td>${u.email||'—'}</td>
+        <td>${rs.length?`<span class="chip green">${rs.length}件</span>`:'<span class="chip gray">なし</span>'}</td>
+        <td>${u.createdAt?fmtDate(u.createdAt):'—'}</td>
+        <td style="color:#BFCBC8">›</td></tr>`;}).join('')}
+  </tbody></table>`;
+  wrap.querySelectorAll('[data-cust]').forEach(tr=>tr.onclick=()=>openCustomer(tr.dataset.cust));
+}
+let currentCust=null;
+function openCustomer(memberId){
+  currentCust=memberId;
+  const u=DB.get(K.users,[]).find(x=>x.memberId===memberId);
+  const rentals=DB.get(K.rentals,[]).filter(r=>r.memberId===memberId);
+  const r0=rentals[0];
+  const idPhoto=r0&&r0.idPhoto?`<img class="idphoto" src="${r0.idPhoto}" alt="本人確認書類">`:'<span style="color:var(--muted)">（レンタル申込時に登録されます）</span>';
+  const rentalRows=rentals.length?rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}/月</td><td>${fmtDate(r.startedAt)}</td></tr>`).join(''):'<tr><td colspan="4" style="color:var(--muted)">レンタルはありません</td></tr>';
+  document.getElementById('cust-detail-body').innerHTML=`
+    <div class="panel"><div class="ph"><h2>会員 ${u.memberId}</h2><button class="btn btn-primary btn-sm" id="cd-news">📣 お知らせを送る</button></div>
+      <div class="pb">
+        <div class="kv">
+          <div class="k">お名前</div><div class="v">${r0?r0.customerName:'<span style="color:var(--muted)">未申込</span>'}</div>
+          <div class="k">登録ID</div><div class="v mono">${u.memberId}</div>
+          <div class="k">登録パスワード</div><div class="v mono">${u.password}</div>
+          <div class="k">メール</div><div class="v">${u.email||'—'}</div>
+          <div class="k">レンタルID</div><div class="v mono">${rentals.map(r=>r.rentalId).join(' , ')||'—'}</div>
+          <div class="k">生年月日</div><div class="v">${r0?r0.birthdate:'—'}</div>
+          <div class="k">住所</div><div class="v">${r0?r0.address:'—'}</div>
+          <div class="k">電話番号</div><div class="v">${r0?r0.phone:'—'}</div>
+          <div class="k">レンタル中の自転車</div><div class="v">${rentals.map(r=>r.bikeName).join(' , ')||'—'}</div>
+        </div>
+        <label style="margin-top:18px">本人確認書類</label>${idPhoto}
+      </div>
+    </div>
+    <div class="panel"><div class="ph"><h2>レンタル履歴</h2></div>
+      <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
+    </div>`;
+  document.getElementById('cd-news').onclick=()=>openNewsModal(memberId);
+  goView('v-cust-detail');
+}
+
+/* announce modal */
+function openNewsModal(target){
+  document.getElementById('news-to').textContent = target?`宛先：会員 ${target}`:'宛先：全会員';
+  document.getElementById('news-title').value='';
+  document.getElementById('news-body').value='';
+  document.getElementById('modal-news').classList.add('on');
+  document.getElementById('modal-news').dataset.target=target||'';
+}
+document.getElementById('news-cancel').onclick=()=>document.getElementById('modal-news').classList.remove('on');
+document.getElementById('news-send').onclick=()=>{
+  const title=document.getElementById('news-title').value.trim();
+  const body=document.getElementById('news-body').value.trim();
+  if(!title||!body){ toast('タイトルと本文を入力してください'); return; }
+  const news=DB.get(K.news,[]);
+  news.unshift({id:'N'+Date.now(),date:new Date().toISOString().slice(0,10),title,body,target:document.getElementById('modal-news').dataset.target||''});
+  DB.set(K.news,news);
+  document.getElementById('modal-news').classList.remove('on');
+  toast('お知らせを送信しました');
+};
+
+/* ===== bikes ===== */
+function renderBikeList(){
+  const bikes=DB.get(K.bikes,[]);
+  const wrap=document.getElementById('bk-table');
+  if(!bikes.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">🚲</div><p>まだ自転車が登録されていません。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>写真</th><th>自転車名</th><th>月額</th><th>車体番号</th><th>保険期限</th><th>在庫</th><th></th></tr></thead><tbody>
+    ${bikes.map(b=>`<tr class="click" data-bk="${b.id}">
+      <td>${b.photos&&b.photos[0]?`<img src="${b.photos[0]}" style="width:46px;height:46px;object-fit:cover;border-radius:8px">`:`<span style="font-size:24px">${b.emoji||'🚲'}</span>`}</td>
+      <td><b>${b.name}</b><br><span style="color:var(--muted);font-size:12px">${b.specShort||''}</span></td>
+      <td>¥${(b.priceMonthly||0).toLocaleString()}/月</td>
+      <td class="mono">${b.frameNo||'—'}</td>
+      <td>${b.insurance||'—'}</td>
+      <td>${b.stock||0}台</td>
+      <td style="color:#BFCBC8">›</td></tr>`).join('')}
+  </tbody></table>`;
+  wrap.querySelectorAll('[data-bk]').forEach(tr=>tr.onclick=()=>editBike(tr.dataset.bk));
+}
+let bikePhotos=[]; let editingBikeId=null;
+function renderPhotoSlots(){
+  const wrap=document.getElementById('bk-photos'); wrap.innerHTML='';
+  for(let i=0;i<4;i++){
+    const slot=document.createElement('div'); slot.className='photo-slot';
+    if(bikePhotos[i]){
+      slot.innerHTML=`<img src="${bikePhotos[i]}"><button class="rm" data-rm="${i}">✕</button>`;
+    }else{ slot.textContent='＋'; }
+    slot.onclick=(ev)=>{ if(ev.target.dataset.rm!==undefined){ bikePhotos.splice(+ev.target.dataset.rm,1); renderPhotoSlots(); return; } pickPhoto(i); };
+    wrap.appendChild(slot);
+  }
+}
+function pickPhoto(i){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{bikePhotos[i]=r.result;renderPhotoSlots();};r.readAsDataURL(f);};
+  inp.click();
+}
+function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-stock','bk-emoji','bk-note'].forEach(x=>document.getElementById(x).value=''); document.getElementById('bk-err').textContent=''; renderPhotoSlots(); }
+document.getElementById('bk-new').onclick=()=>{ editingBikeId=null; document.getElementById('bk-form-title').textContent='自転車の新規登録'; document.getElementById('bk-delete').style.display='none'; clearBikeForm(); goView('v-bike-form'); };
+function editBike(id){
+  const b=DB.get(K.bikes,[]).find(x=>x.id===id); if(!b)return;
+  editingBikeId=id; document.getElementById('bk-form-title').textContent='自転車の編集';
+  document.getElementById('bk-delete').style.display='inline-flex';
+  bikePhotos=(b.photos||[]).slice();
+  document.getElementById('bk-name').value=b.name||'';
+  document.getElementById('bk-price').value=b.priceMonthly||'';
+  document.getElementById('bk-specshort').value=b.specShort||'';
+  document.getElementById('bk-speclong').value=b.specLong||'';
+  document.getElementById('bk-frame').value=b.frameNo||'';
+  document.getElementById('bk-insurance').value=b.insurance||'';
+  document.getElementById('bk-stock').value=b.stock||0;
+  document.getElementById('bk-emoji').value=b.emoji||'';
+  document.getElementById('bk-note').value=b.note||'';
+  document.getElementById('bk-err').textContent='';
+  renderPhotoSlots(); goView('v-bike-form');
+}
+document.getElementById('bk-cancel').onclick=back;
+document.getElementById('bk-save').onclick=()=>{
+  const name=document.getElementById('bk-name').value.trim();
+  const price=parseInt(document.getElementById('bk-price').value,10);
+  const specShort=document.getElementById('bk-specshort').value.trim();
+  const err=document.getElementById('bk-err');err.textContent='';
+  if(!name||!specShort||isNaN(price)){ err.textContent='自転車名・月額・簡単なスペックは必須です。'; return; }
+  const bikes=DB.get(K.bikes,[]);
+  const data={ name, priceMonthly:price, specShort,
+    specLong:document.getElementById('bk-speclong').value.trim(),
+    frameNo:document.getElementById('bk-frame').value.trim(),
+    insurance:document.getElementById('bk-insurance').value,
+    stock:parseInt(document.getElementById('bk-stock').value,10)||0,
+    emoji:document.getElementById('bk-emoji').value.trim()||'🚲',
+    note:document.getElementById('bk-note').value.trim(),
+    photos:bikePhotos.slice() };
+  if(editingBikeId){ const b=bikes.find(x=>x.id===editingBikeId); Object.assign(b,data); }
+  else { data.id='BK'+Date.now(); data.rented=false; bikes.push(data); }
+  DB.set(K.bikes,bikes); toast('保存しました'); back();
+};
+document.getElementById('bk-delete').onclick=()=>{
+  if(!editingBikeId)return;
+  if(confirm('この自転車を削除しますか？')){ DB.set(K.bikes,DB.get(K.bikes,[]).filter(b=>b.id!==editingBikeId)); toast('削除しました'); back(); }
+};
+
+/* ===== terms ===== */
+document.getElementById('terms-save').onclick=()=>{ DB.set(K.terms,document.getElementById('terms-edit').value); toast('利用規約を保存しました'); };
+
+/* ===== rentals + CSV ===== */
+function renderRentals(){
+  const rentals=DB.get(K.rentals,[]);
+  const wrap=document.getElementById('rt-table');
+  if(!rentals.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">📊</div><p>レンタルはまだありません。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>レンタルID</th><th>顧客</th><th>会員ID</th><th>自転車</th><th>月額</th><th>レンタル日</th></tr></thead><tbody>
+    ${rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.customerName||'—'}</td><td class="mono">${r.memberId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}</td><td>${fmtDate(r.startedAt)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+document.getElementById('rt-csv').onclick=()=>{
+  const rentals=DB.get(K.rentals,[]);
+  if(!rentals.length){ toast('書き出すデータがありません'); return; }
+  const head=['レンタルID','顧客名','会員ID','自転車名','月額料金','レンタル日'];
+  const rows=rentals.map(r=>[r.rentalId,r.customerName||'',r.memberId,r.bikeName,r.priceMonthly||0,fmtDate(r.startedAt)]);
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const csv='\uFEFF'+[head,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`rental_status_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('CSVを書き出しました');
+};
+
+/* utils */
+function fmtDate(iso){ if(!iso)return'—'; const d=new Date(iso); if(isNaN(d))return iso; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+</script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vianova Cycle Pass — 管理マスター（Web）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F2E33; --ink2:#1C4F57; --bg:#EEF1ED; --panel:#FFFFFF;
+    --accent:#15B981; --accent-press:#0E9468; --persimmon:#E8643C;
+    --text:#16201F; --muted:#62716F; --line:#E2E6DF; --line2:#EDEFEA;
+    --radius:14px; --radius-sm:10px; --shadow:0 6px 24px rgba(15,46,51,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Noto Sans JP",system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  button,input,textarea,select{font-family:inherit}
+
+  .login-wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#0F2E33,#1C4F57);padding:20px}
+  .login-card{background:#fff;border-radius:20px;padding:40px 34px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .mark{width:42px;height:42px;border-radius:11px;background:var(--accent);position:relative;flex:0 0 auto}
+  .mark::before,.mark::after{content:"";position:absolute;border:2.5px solid #fff;border-radius:50%;width:11px;height:11px;bottom:8px}
+  .mark::before{left:6px}.mark::after{right:6px}
+  .bname{font-family:"Outfit",sans-serif;font-weight:700;font-size:18px;line-height:1.1}
+  .bname small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:600}
+  .login-card h1{font-size:20px;margin:0 0 4px}
+  .login-card .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  .tag{display:inline-block;background:#FCEAE3;color:var(--persimmon);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:18px}
+
+  label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--ink)}
+  .field{position:relative}
+  input[type=text],input[type=password],input[type=number],input[type=date],input[type=url],textarea,select{
+    width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-size:14.5px;background:#fff;color:var(--text);transition:border-color .15s}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:90px;line-height:1.7}
+  .err{font-size:12px;color:var(--persimmon);margin-top:6px;font-weight:600;min-height:1px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border:0;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:transform .05s,background .15s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:active{background:var(--accent-press)}
+  .btn-ink{background:var(--ink);color:#fff}
+  .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-danger{background:#fff;color:var(--persimmon);border:1.5px solid #F2C9BC}
+  .btn-block{width:100%}
+  .btn-sm{padding:8px 13px;font-size:13px}
+
+  .shell{display:none;min-height:100vh}
+  .shell.on{display:grid;grid-template-columns:248px 1fr}
+  .side{background:var(--ink);color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  .side .brand{margin-bottom:24px;padding:0 6px}
+  .side .bname{color:#fff}.side .bname small{color:rgba(255,255,255,.6)}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;cursor:pointer;color:rgba(255,255,255,.8);font-size:14.5px;font-weight:500;border:0;background:transparent;width:100%;text-align:left}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav-item.active{background:var(--accent);color:#fff;font-weight:700}
+  .nav-item .ic{font-size:18px;width:22px;text-align:center}
+  .side .foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+  .side .logout{color:rgba(255,255,255,.7);font-size:13px;background:transparent;border:0;cursor:pointer;padding:10px 14px;width:100%;text-align:left;border-radius:11px}
+  .side .logout:hover{background:rgba(255,255,255,.08);color:#fff}
+
+  .main{min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 28px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .back{appearance:none;border:1.5px solid var(--line);background:#fff;width:38px;height:38px;border-radius:10px;font-size:20px;cursor:pointer;color:var(--ink)}
+  .topbar h1{font-size:19px;margin:0}
+  .topbar .crumb{color:var(--muted);font-size:13px}
+  .content{padding:26px 28px 50px;flex:1;max-width:1100px;width:100%}
+
+  .view{display:none}.view.active{display:block}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel+.panel{margin-top:18px}
+  .panel .ph{padding:18px 20px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .panel .ph h2{font-size:16px;margin:0}
+  .panel .pb{padding:20px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .stat .lab{font-size:12.5px;color:var(--muted);font-weight:600}
+  .stat .num{font-family:"Outfit",sans-serif;font-size:30px;font-weight:700;color:var(--ink);margin-top:4px}
+  .stat .num small{font-size:14px;color:var(--muted)}
+
+  .dash{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .dash-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;cursor:pointer;box-shadow:var(--shadow);text-align:left;display:flex;gap:16px;align-items:flex-start}
+  .dash-card:hover{border-color:var(--accent)}
+  .dash-card .ic{width:52px;height:52px;border-radius:13px;background:#EAF7F1;color:var(--accent-press);display:grid;place-items:center;font-size:25px;flex:0 0 auto}
+  .dash-card h3{margin:0 0 5px;font-size:16.5px;color:var(--ink)}
+  .dash-card p{margin:0;font-size:13px;color:var(--muted)}
+
+  .table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .table th{text-align:left;padding:12px 14px;background:#F6F8F5;color:var(--muted);font-weight:700;font-size:12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:12px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .table tr:last-child td{border-bottom:0}
+  .table tbody tr.click{cursor:pointer}
+  .table tbody tr.click:hover{background:#F6FBF8}
+  .mono{font-family:"Outfit",monospace;font-weight:700;letter-spacing:.04em;color:var(--ink)}
+  .chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700}
+  .chip.green{background:#E7F6EF;color:var(--accent-press)}
+  .chip.gray{background:#EEF0EC;color:var(--muted)}
+  .chip.amber{background:#FCEFD8;color:#B5803A}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid2 .full{grid-column:1/-1}
+  .row-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+  .empty{text-align:center;color:var(--muted);padding:46px 20px}
+  .empty .em-ic{font-size:42px;opacity:.5}.empty p{margin:10px 0 0}
+
+  .photos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .photo-slot{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:11px;background:#FAFBF9;display:grid;place-items:center;cursor:pointer;overflow:hidden;position:relative;color:var(--muted);font-size:24px}
+  .photo-slot img{width:100%;height:100%;object-fit:cover}
+  .photo-slot .rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:0}
+  .kv .k{padding:11px 0;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line2)}
+  .kv .v{padding:11px 0;font-size:14px;font-weight:600;border-bottom:1px solid var(--line2);color:var(--ink);word-break:break-all}
+  .idphoto{max-width:280px;border-radius:11px;border:1px solid var(--line);margin-top:8px}
+
+  /* terms language tabs */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--muted);font-weight:700;font-size:13.5px;cursor:pointer}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--persimmon);margin-left:7px;vertical-align:middle}
+
+  .modal{position:fixed;inset:0;background:rgba(15,46,51,.4);display:none;place-items:center;z-index:50;padding:20px}
+  .modal.on{display:grid}
+  .modal .box{background:#fff;border-radius:16px;max-width:480px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 4px}
+
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--ink);color:#fff;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transform:translateY(12px);transition:.25s;z-index:100;pointer-events:none}
+  .toast.show{opacity:1;transform:none}
+
+  @media(max-width:900px){
+    .shell.on{grid-template-columns:1fr}
+    .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;gap:4px}
+    .side .brand{width:100%}.side .foot{margin:0}
+    .nav-item{width:auto}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .dash,.grid2,.kv{grid-template-columns:1fr}
+    .kv .k{border:0;padding-bottom:0}.kv .v{padding-top:2px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="login">
+  <div class="login-card">
+    <div class="brand"><div class="mark"></div><div class="bname">Vianova<small>CYCLE PASS</small></div></div>
+    <span class="tag">管理マスター（Web）</span>
+    <h1>マスターログイン</h1>
+    <p class="sub">管理者パスワードを入力してください。</p>
+    <label>サーバーURL</label>
+    <div class="field"><input type="url" id="m-server" placeholder="http://localhost:4080"></div>
+    <label>パスワード</label>
+    <div class="field"><input type="password" id="m-pw" placeholder="パスワード"></div>
+    <div class="err" id="m-err"></div>
+    <button class="btn btn-primary btn-block" id="m-go" style="margin-top:18px">ログイン</button>
+    <p class="hint" style="margin-top:14px">初期パスワード：<b>master123</b>（サーバーの ADMIN_PASSWORD で変更可）</p>
+  </div>
+</div>
+
+<!-- ===== SHELL ===== -->
+<div class="shell" id="shell">
+  <aside class="side">
+    <div class="brand"><div class="mark"></div><div class="bname">Vianova<small>CYCLE PASS</small></div></div>
+    <button class="nav-item active" data-view="v-dash"><span class="ic">▦</span>ダッシュボード</button>
+    <button class="nav-item" data-view="v-customers"><span class="ic">👤</span>顧客管理</button>
+    <button class="nav-item" data-view="v-bikes"><span class="ic">🚲</span>自転車登録</button>
+    <button class="nav-item" data-view="v-terms"><span class="ic">📑</span>利用規約変更</button>
+    <button class="nav-item" data-view="v-rentals"><span class="ic">📊</span>レンタル状況</button>
+    <div class="foot"><button class="logout" id="m-logout">⎋ ログアウト</button></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="back" id="m-back" style="display:none">‹</button>
+      <div><h1 id="tb-title">ダッシュボード</h1><div class="crumb" id="tb-crumb"></div></div>
+    </div>
+    <div class="content">
+
+      <div class="view active" id="v-dash">
+        <div class="stats" id="dash-stats"></div>
+        <div class="dash">
+          <button class="dash-card" data-view="v-customers"><span class="ic">👤</span><div><h3>顧客管理</h3><p>会員情報・本人確認・レンタル状況の確認、お知らせ送信</p></div></button>
+          <button class="dash-card" data-view="v-bikes"><span class="ic">🚲</span><div><h3>自転車登録</h3><p>写真・料金・スペック・車体番号・保険期限などの登録</p></div></button>
+          <button class="dash-card" data-view="v-terms"><span class="ic">📑</span><div><h3>利用規約変更</h3><p>日本語・英語・中文・한국어の4表記をそれぞれ編集</p></div></button>
+          <button class="dash-card" data-view="v-rentals"><span class="ic">📊</span><div><h3>レンタル状況</h3><p>レンタル一覧の確認とCSVデータの書き出し</p></div></button>
+        </div>
+      </div>
+
+      <div class="view" id="v-customers">
+        <div class="panel">
+          <div class="ph"><h2>顧客一覧</h2><span class="crumb" id="cust-count"></span></div>
+          <div class="pb" style="padding:0"><div id="cust-table"></div></div>
+        </div>
+      </div>
+
+      <div class="view" id="v-cust-detail"><div id="cust-detail-body"></div></div>
+
+      <div class="view" id="v-bikes">
+        <div class="panel">
+          <div class="ph"><h2>登録済み自転車</h2><button class="btn btn-primary btn-sm" id="bk-new">＋ 新規登録</button></div>
+          <div class="pb" style="padding:0"><div id="bk-table"></div></div>
+        </div>
+      </div>
+
+      <div class="view" id="v-bike-form">
+        <div class="panel">
+          <div class="ph"><h2 id="bk-form-title">自転車の登録</h2></div>
+          <div class="pb">
+            <label>自転車の写真（最大4枚）</label>
+            <div class="photos" id="bk-photos"></div>
+            <div class="grid2" style="margin-top:8px">
+              <div><label>自転車名 <span style="color:var(--persimmon)">*</span></label><input type="text" id="bk-name" placeholder="Vianova City 7"></div>
+              <div><label>レンタル代（月額・円） <span style="color:var(--persimmon)">*</span></label><input type="number" id="bk-price" placeholder="3800" min="0"></div>
+              <div class="full"><label>簡単なスペック <span style="color:var(--persimmon)">*</span></label><input type="text" id="bk-specshort" placeholder="7段変速 / 27インチ / 軽量アルミ"></div>
+              <div class="full"><label>詳しいスペック</label><textarea id="bk-speclong" placeholder="フレーム素材、装備、対象用途など"></textarea></div>
+              <div><label>車体番号</label><input type="text" id="bk-frame" placeholder="VN-CITY-0001"></div>
+              <div><label>保険期限</label><input type="date" id="bk-insurance"></div>
+              <div><label>レンタル台数（在庫）</label><input type="number" id="bk-stock" placeholder="4" min="0"></div>
+              <div><label>絵文字アイコン（写真なしの場合）</label><input type="text" id="bk-emoji" placeholder="🚲" maxlength="2"></div>
+              <div class="full"><label>備考</label><textarea id="bk-note" placeholder="メモ・特記事項"></textarea></div>
+            </div>
+            <div class="err" id="bk-err"></div>
+            <div class="row-actions">
+              <button class="btn btn-primary" id="bk-save">保存する</button>
+              <button class="btn btn-ghost" id="bk-cancel">キャンセル</button>
+              <button class="btn btn-danger" id="bk-delete" style="display:none;margin-left:auto">この自転車を削除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="v-terms">
+        <div class="panel">
+          <div class="ph"><h2>利用規約の編集（4表記）</h2><span class="crumb">表記を選んで編集 → 保存でアプリに即反映</span></div>
+          <div class="pb">
+            <div class="tabs" id="terms-tabs"></div>
+            <textarea id="terms-edit" style="min-height:420px"></textarea>
+            <div class="row-actions">
+              <button class="btn btn-primary" id="terms-save">この表記を保存</button>
+              <button class="btn btn-ink" id="terms-save-all">4表記すべて保存</button>
+              <span class="hint" id="terms-status" style="align-self:center"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="v-rentals">
+        <div class="panel">
+          <div class="ph"><h2>レンタル状況</h2><button class="btn btn-ink btn-sm" id="rt-csv">⬇ CSVデータを書き出す</button></div>
+          <div class="pb" style="padding:0"><div id="rt-table"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- announce modal -->
+<div class="modal" id="modal-news">
+  <div class="box">
+    <h3>お知らせを送信</h3>
+    <p class="sub" id="news-to" style="color:var(--muted);font-size:13px;margin:2px 0 14px"></p>
+    <label>タイトル</label><input type="text" id="news-title" placeholder="例：点検のご案内">
+    <label>本文</label><textarea id="news-body" placeholder="お客様へのメッセージ"></textarea>
+    <div class="row-actions"><button class="btn btn-primary" id="news-send">送信</button><button class="btn btn-ghost" id="news-cancel">閉じる</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Vianova Cycle Pass — 管理マスター（Web版）
+   API サーバー（既定 http://localhost:4080）に接続して動作します。
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+const LANGS = [['ja','日本語'],['en','English'],['zh','中文'],['ko','한국어']];
+// When the admin is served by the API server itself (…/admin/), default to that
+// same origin. When opened as a local file, fall back to the dev server URL.
+const SAME_ORIGIN = (location.protocol === 'http:' || location.protocol === 'https:') ? location.origin : '';
+let API = localStorage.getItem('vcp_admin_api') || SAME_ORIGIN || 'http://localhost:4080';
+let TOKEN = sessionStorage.getItem('vcp_admin_token') || '';
+
+/* ---- toast ---- */
+let tT; function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ---- API helper ---- */
+async function api(path, { method='GET', body, auth=true } = {}){
+  const headers = { 'Content-Type':'application/json' };
+  if (auth && TOKEN) headers.Authorization = 'Bearer ' + TOKEN;
+  const res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  let data = null; try { data = await res.json(); } catch {}
+  if (res.status === 401) { doLogout(); throw new Error('AUTH'); }
+  if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+  return data;
+}
+
+/* ===== login ===== */
+$('m-server').value = API;
+$('m-go').onclick = login;
+$('m-pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+async function login(){
+  const err = $('m-err'); err.textContent = '';
+  API = ($('m-server').value || 'http://localhost:4080').trim().replace(/\/$/, '');
+  localStorage.setItem('vcp_admin_api', API);
+  try {
+    const r = await api('/api/admin/login', { method:'POST', auth:false, body:{ password: $('m-pw').value } });
+    TOKEN = r.token; sessionStorage.setItem('vcp_admin_token', TOKEN);
+    enterApp();
+  } catch (e) {
+    err.textContent = e.message === 'BAD_PASSWORD' ? 'パスワードが正しくありません。'
+      : 'サーバーに接続できませんでした。URLとサーバー起動を確認してください。';
+  }
+}
+function enterApp(){ $('login').style.display='none'; $('shell').classList.add('on'); goView('v-dash'); }
+function doLogout(){ TOKEN=''; sessionStorage.removeItem('vcp_admin_token'); $('m-pw').value=''; $('shell').classList.remove('on'); $('login').style.display='grid'; }
+$('m-logout').onclick = () => { if (confirm('ログアウトしますか？')) doLogout(); };
+
+/* ===== navigation ===== */
+const TITLES={'v-dash':'ダッシュボード','v-customers':'顧客管理','v-cust-detail':'顧客の詳細','v-bikes':'自転車登録','v-bike-form':'自転車の登録','v-terms':'利用規約変更','v-rentals':'レンタル状況'};
+const ROOTVIEWS=['v-dash','v-customers','v-bikes','v-terms','v-rentals'];
+let viewStack=['v-dash'];
+function setActiveNav(view){
+  const nv = ROOTVIEWS.includes(view)?view:(view==='v-cust-detail'?'v-customers':view==='v-bike-form'?'v-bikes':'v-dash');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===nv));
+}
+async function render(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  $('tb-title').textContent=TITLES[view]||''; $('tb-crumb').textContent='';
+  $('m-back').style.display = ROOTVIEWS.includes(view)?'none':'inline-flex';
+  setActiveNav(view); window.scrollTo(0,0);
+  try {
+    if(view==='v-dash') await renderDash();
+    if(view==='v-customers') await renderCustomers();
+    if(view==='v-bikes') await renderBikeList();
+    if(view==='v-terms') await renderTerms();
+    if(view==='v-rentals') await renderRentals();
+  } catch(e){ if(e.message!=='AUTH') toast('読み込みに失敗しました'); }
+}
+function goView(view){ if(ROOTVIEWS.includes(view)) viewStack=[view]; else viewStack.push(view); render(view); }
+function back(){ if(viewStack.length>1){ viewStack.pop(); render(viewStack[viewStack.length-1]); } }
+$('m-back').onclick=back;
+document.addEventListener('click',e=>{ const n=e.target.closest('[data-view]'); if(n) goView(n.dataset.view); });
+
+/* ===== dashboard ===== */
+async function renderDash(){
+  const s = await api('/api/admin/stats');
+  $('dash-stats').innerHTML=`
+    <div class="stat"><div class="lab">会員数</div><div class="num">${s.users}<small> 人</small></div></div>
+    <div class="stat"><div class="lab">登録車種</div><div class="num">${s.bikes}<small> 種</small></div></div>
+    <div class="stat"><div class="lab">レンタル中</div><div class="num">${s.rentals}<small> 件</small></div></div>
+    <div class="stat"><div class="lab">月間売上(予定)</div><div class="num">¥${(s.revenue||0).toLocaleString()}</div></div>`;
+}
+
+/* ===== customers ===== */
+function fmtDate(iso){ if(!iso)return'—'; const d=new Date(iso); if(isNaN(d))return iso; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+async function renderCustomers(){
+  const { customers } = await api('/api/admin/customers');
+  $('cust-count').textContent=`${customers.length} 名`;
+  const wrap=$('cust-table');
+  if(!customers.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">👤</div><p>まだ会員が登録されていません。<br>アプリで新規登録するとここに表示されます。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>会員ID</th><th>メール</th><th>確認</th><th>レンタル</th><th>登録日</th><th></th></tr></thead><tbody>
+    ${customers.map(u=>`<tr class="click" data-cust="${u.memberId}">
+      <td class="mono">${u.memberId}</td><td>${u.email||'—'}</td>
+      <td>${u.emailVerified?'<span class="chip green">確認済</span>':'<span class="chip amber">未確認</span>'}</td>
+      <td>${u.rentalCount?`<span class="chip green">${u.rentalCount}件</span>`:'<span class="chip gray">なし</span>'}</td>
+      <td>${fmtDate(u.createdAt)}</td><td style="color:#BFCBC8">›</td></tr>`).join('')}
+  </tbody></table>`;
+  wrap.querySelectorAll('[data-cust]').forEach(tr=>tr.onclick=()=>openCustomer(tr.dataset.cust));
+}
+async function openCustomer(memberId){
+  const { customer:u, rentals } = await api('/api/admin/customers/'+encodeURIComponent(memberId));
+  const r0 = rentals[0];
+  const idPhoto = r0 && r0.idPhoto ? `<img class="idphoto" src="${r0.idPhoto}" alt="本人確認書類">` : '<span style="color:var(--muted)">（レンタル申込時に登録されます）</span>';
+  const rentalRows = rentals.length ? rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}/月</td><td>${fmtDate(r.startedAt)}</td></tr>`).join('') : '<tr><td colspan="4" style="color:var(--muted)">レンタルはありません</td></tr>';
+  $('cust-detail-body').innerHTML=`
+    <div class="panel"><div class="ph"><h2>会員 ${u.memberId}</h2><button class="btn btn-primary btn-sm" id="cd-news">📣 お知らせを送る</button></div>
+      <div class="pb"><div class="kv">
+        <div class="k">お名前</div><div class="v">${r0?r0.customerName:'<span style="color:var(--muted)">未申込</span>'}</div>
+        <div class="k">登録ID</div><div class="v mono">${u.memberId}</div>
+        <div class="k">メール</div><div class="v">${u.email||'—'}</div>
+        <div class="k">メール確認</div><div class="v">${u.emailVerified?'確認済':'未確認'}</div>
+        <div class="k">レンタルID</div><div class="v mono">${rentals.map(r=>r.rentalId).join(' , ')||'—'}</div>
+        <div class="k">生年月日</div><div class="v">${r0?r0.birthdate:'—'}</div>
+        <div class="k">住所</div><div class="v">${r0?r0.address:'—'}</div>
+        <div class="k">電話番号</div><div class="v">${r0?r0.phone:'—'}</div>
+        <div class="k">レンタル中の自転車</div><div class="v">${rentals.map(r=>r.bikeName).join(' , ')||'—'}</div>
+      </div>
+      <label style="margin-top:18px">本人確認書類</label>${idPhoto}</div>
+    </div>
+    <div class="panel"><div class="ph"><h2>レンタル履歴</h2></div>
+      <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
+    </div>`;
+  $('cd-news').onclick=()=>openNewsModal(memberId);
+  goView('v-cust-detail');
+}
+
+/* announce modal */
+function openNewsModal(target){
+  $('news-to').textContent = target?`宛先：会員 ${target}`:'宛先：全会員';
+  $('news-title').value=''; $('news-body').value='';
+  $('modal-news').classList.add('on'); $('modal-news').dataset.target=target||'';
+}
+$('news-cancel').onclick=()=>$('modal-news').classList.remove('on');
+$('news-send').onclick=async()=>{
+  const title=$('news-title').value.trim(), body=$('news-body').value.trim();
+  if(!title||!body){ toast('タイトルと本文を入力してください'); return; }
+  try { await api('/api/admin/news',{method:'POST',body:{title,body,target:$('modal-news').dataset.target||''}});
+    $('modal-news').classList.remove('on'); toast('お知らせを送信しました'); }
+  catch{ toast('送信に失敗しました'); }
+};
+
+/* ===== bikes ===== */
+async function renderBikeList(){
+  const { bikes } = await api('/api/admin/bikes');
+  const wrap=$('bk-table');
+  if(!bikes.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">🚲</div><p>まだ自転車が登録されていません。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>写真</th><th>自転車名</th><th>月額</th><th>車体番号</th><th>保険期限</th><th>在庫</th><th></th></tr></thead><tbody>
+    ${bikes.map(b=>`<tr class="click" data-bk="${b.id}">
+      <td>${b.photos&&b.photos[0]?`<img src="${b.photos[0]}" style="width:46px;height:46px;object-fit:cover;border-radius:8px">`:`<span style="font-size:24px">${b.emoji||'🚲'}</span>`}</td>
+      <td><b>${b.name}</b><br><span style="color:var(--muted);font-size:12px">${b.specShort||''}</span></td>
+      <td>¥${(b.priceMonthly||0).toLocaleString()}/月</td>
+      <td class="mono">${b.frameNo||'—'}</td><td>${b.insurance||'—'}</td><td>${b.stock||0}台</td>
+      <td style="color:#BFCBC8">›</td></tr>`).join('')}
+  </tbody></table>`;
+  wrap.querySelectorAll('[data-bk]').forEach(tr=>tr.onclick=()=>editBike(tr.dataset.bk));
+}
+let bikePhotos=[]; let editingBikeId=null; let bikeCache=[];
+function renderPhotoSlots(){
+  const wrap=$('bk-photos'); wrap.innerHTML='';
+  for(let i=0;i<4;i++){
+    const slot=document.createElement('div'); slot.className='photo-slot';
+    if(bikePhotos[i]) slot.innerHTML=`<img src="${bikePhotos[i]}"><button class="rm" data-rm="${i}">✕</button>`;
+    else slot.textContent='＋';
+    slot.onclick=(ev)=>{ if(ev.target.dataset.rm!==undefined){ bikePhotos.splice(+ev.target.dataset.rm,1); renderPhotoSlots(); return; } pickPhoto(i); };
+    wrap.appendChild(slot);
+  }
+}
+function pickPhoto(i){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{bikePhotos[i]=r.result;renderPhotoSlots();};r.readAsDataURL(f);};
+  inp.click();
+}
+function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-stock','bk-emoji','bk-note'].forEach(x=>$(x).value=''); $('bk-err').textContent=''; renderPhotoSlots(); }
+$('bk-new').onclick=()=>{ editingBikeId=null; $('bk-form-title').textContent='自転車の新規登録'; $('bk-delete').style.display='none'; clearBikeForm(); goView('v-bike-form'); };
+async function editBike(id){
+  let b = bikeCache.find(x=>x.id===id);
+  if(!b){ const r = await api('/api/admin/bikes'); bikeCache=r.bikes; b=bikeCache.find(x=>x.id===id); }
+  if(!b) return;
+  editingBikeId=id; $('bk-form-title').textContent='自転車の編集'; $('bk-delete').style.display='inline-flex';
+  bikePhotos=(b.photos||[]).slice();
+  $('bk-name').value=b.name||''; $('bk-price').value=b.priceMonthly||''; $('bk-specshort').value=b.specShort||'';
+  $('bk-speclong').value=b.specLong||''; $('bk-frame').value=b.frameNo||''; $('bk-insurance').value=b.insurance||'';
+  $('bk-stock').value=b.stock||0; $('bk-emoji').value=b.emoji||''; $('bk-note').value=b.note||''; $('bk-err').textContent='';
+  renderPhotoSlots(); goView('v-bike-form');
+}
+$('bk-cancel').onclick=back;
+$('bk-save').onclick=async()=>{
+  const err=$('bk-err'); err.textContent='';
+  const body={ name:$('bk-name').value.trim(), priceMonthly:parseInt($('bk-price').value,10),
+    specShort:$('bk-specshort').value.trim(), specLong:$('bk-speclong').value.trim(),
+    frameNo:$('bk-frame').value.trim(), insurance:$('bk-insurance').value,
+    stock:parseInt($('bk-stock').value,10)||0, emoji:$('bk-emoji').value.trim()||'🚲',
+    note:$('bk-note').value.trim(), photos:bikePhotos.slice() };
+  if(!body.name||!body.specShort||!body.priceMonthly){ err.textContent='自転車名・月額・簡単なスペックは必須です。'; return; }
+  try {
+    if(editingBikeId) await api('/api/admin/bikes/'+editingBikeId,{method:'PUT',body});
+    else await api('/api/admin/bikes',{method:'POST',body});
+    bikeCache=[]; toast('保存しました'); back();
+  } catch{ err.textContent='保存に失敗しました。'; }
+};
+$('bk-delete').onclick=async()=>{
+  if(!editingBikeId) return;
+  if(confirm('この自転車を削除しますか？')){ try{ await api('/api/admin/bikes/'+editingBikeId,{method:'DELETE'}); bikeCache=[]; toast('削除しました'); back(); }catch{ toast('削除に失敗しました'); } }
+};
+
+/* ===== terms (4 languages) ===== */
+let termsData={ja:'',en:'',zh:'',ko:''}; let termsLang='ja'; let termsDirty={ja:false,en:false,zh:false,ko:false};
+async function renderTerms(){
+  const { terms } = await api('/api/admin/terms');
+  termsData = Object.assign({ja:'',en:'',zh:'',ko:''}, terms);
+  termsDirty={ja:false,en:false,zh:false,ko:false};
+  termsLang='ja';
+  drawTermTabs(); $('terms-edit').value=termsData.ja; $('terms-status').textContent='';
+}
+function drawTermTabs(){
+  $('terms-tabs').innerHTML = LANGS.map(([v,n])=>
+    `<button class="tab ${v===termsLang?'active':''}" data-tl="${v}">${n}${termsDirty[v]?'<span class="dot"></span>':''}</button>`).join('');
+  $('terms-tabs').querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{
+    termsData[termsLang]=$('terms-edit').value; // keep edits when switching
+    termsLang=b.dataset.tl; $('terms-edit').value=termsData[termsLang]; drawTermTabs();
+  });
+}
+$('terms-edit').addEventListener('input',()=>{ termsDirty[termsLang]=true; });
+$('terms-save').onclick=async()=>{
+  termsData[termsLang]=$('terms-edit').value;
+  try { await api('/api/admin/terms',{method:'PUT',body:{terms:{[termsLang]:termsData[termsLang]}}});
+    termsDirty[termsLang]=false; drawTermTabs(); $('terms-status').textContent='保存しました（'+termsLang+'）'; toast('利用規約を保存しました'); }
+  catch{ toast('保存に失敗しました'); }
+};
+$('terms-save-all').onclick=async()=>{
+  termsData[termsLang]=$('terms-edit').value;
+  try { await api('/api/admin/terms',{method:'PUT',body:{terms:termsData}});
+    termsDirty={ja:false,en:false,zh:false,ko:false}; drawTermTabs(); $('terms-status').textContent='4表記すべて保存しました'; toast('4表記すべて保存しました'); }
+  catch{ toast('保存に失敗しました'); }
+};
+
+/* ===== rentals + CSV ===== */
+let rentalsCache=[];
+async function renderRentals(){
+  const { rentals } = await api('/api/admin/rentals'); rentalsCache=rentals;
+  const wrap=$('rt-table');
+  if(!rentals.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">📊</div><p>レンタルはまだありません。</p></div>'; return; }
+  wrap.innerHTML=`<table class="table"><thead><tr><th>レンタルID</th><th>顧客</th><th>会員ID</th><th>自転車</th><th>月額</th><th>レンタル日</th></tr></thead><tbody>
+    ${rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.customerName||'—'}</td><td class="mono">${r.memberId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}</td><td>${fmtDate(r.startedAt)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+$('rt-csv').onclick=()=>{
+  if(!rentalsCache.length){ toast('書き出すデータがありません'); return; }
+  const head=['レンタルID','顧客名','会員ID','自転車名','月額料金','レンタル日'];
+  const rows=rentalsCache.map(r=>[r.rentalId,r.customerName||'',r.memberId,r.bikeName,r.priceMonthly||0,fmtDate(r.startedAt)]);
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const csv='﻿'+[head,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`vianova_rentals_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('CSVを書き出しました');
+};
+
+/* ===== boot ===== */
+if (TOKEN) { enterApp(); } // resume an existing admin session
+</script>
+</body>
+</html>

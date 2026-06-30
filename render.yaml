@@ -1,0 +1,43 @@
+# Render Blueprint — Vianova Cycle Pass デモ (無料枠)
+#
+# 使い方:
+#   1. このフォルダ(vianova_cycle_pass_file)を GitHub などに push
+#      （まだ git 管理でなければ: git init && git add -A && git commit -m init）
+#   2. Render ダッシュボードで「New +」→「Blueprint」→ このリポジトリを選択
+#   3. 本ファイルが読まれ、Dockerfile から1サービスが作られる（自動でHTTPS化）
+#
+# 公開後のURL例 (https は Render が自動付与):
+#   https://vianova-demo.onrender.com/admin/        … 管理画面 (master123)
+#   https://vianova-demo.onrender.com/health        … 稼働確認
+#   https://vianova-demo.onrender.com/api/bikes     … API
+#
+# アプリは「サーバー接続設定」に上記 https URL を入れればクラウド版に接続できる。
+# メールの確認リンクは、リクエストの実ホスト(https://…onrender.com)から自動生成される。
+services:
+  - type: web
+    name: vianova-demo
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: singapore            # 日本から最も近い無料リージョン
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # 管理パスワード（初回起動でのみ反映）。ダッシュボードで値を設定:
+      - key: ADMIN_PASSWORD
+        sync: false
+      # メール: 試すなら ethereal、本番は SMTP_* をダッシュボードで設定。
+      # 未設定ならモック（確認リンクはAPIレスポンス/ログに出る）。
+      - key: MAIL_MODE
+        value: ""
+      # PORT は Render が自動注入。PUBLIC_URL は未設定でOK（実ホストから導出）。
+#
+# 注意（無料枠）:
+#   - ディスクは再起動で消えるため、会員/レンタル/規約編集はデプロイ毎にリセットされます
+#     （自転車・規約・お知らせは起動時に自動再シード）。
+#   - データを永続化するには Render の「Disk」(有料) を追加し、環境変数 DATA_DIR を
+#     そのマウントパス(例 /var/data)にしてください。
+#   - 無料枠は一定時間アクセスが無いとスリープし、次回アクセスで数十秒の起動待ちがあります。
