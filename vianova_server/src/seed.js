@@ -1,11 +1,12 @@
 'use strict';
 /** Initial seed data (bikes, news, 4-language terms). */
 
+// 1登録=1台。color=カラー / security_no=防犯登録番号 / rented=貸出中(0/1)
 const SEED_BIKES = [
-  { id: 'BK01', name: 'Vianova City 7', emoji: '🚲', spec_short: '7段変速 / 27インチ / 軽量アルミ', spec_long: '通勤通学にぴったりのシティクロス。7段変速で坂道も快適。LEDライト・カゴ標準装備。', price_monthly: 3800, frame_no: 'VN-CITY-0001', insurance: '2027-03-31', stock: 4, note: '', photos: '[]' },
-  { id: 'BK02', name: 'Vianova E-Power', emoji: '⚡', spec_short: '電動アシスト / 走行60km / 大容量バッテリー', spec_long: '坂道もすいすい進む電動アシスト。1回の充電で約60km。買い物にも通勤にも。', price_monthly: 7200, frame_no: 'VN-EP-0002', insurance: '2027-05-31', stock: 2, note: '', photos: '[]' },
-  { id: 'BK03', name: 'Vianova Mini Fold', emoji: '🛴', spec_short: '折りたたみ / 20インチ / 輪行可', spec_long: 'コンパクトに折りたためる人気モデル。電車との組み合わせや車載にも便利。', price_monthly: 4500, frame_no: 'VN-MF-0003', insurance: '2027-01-31', stock: 3, note: '', photos: '[]' },
-  { id: 'BK04', name: 'Vianova Road S', emoji: '🚴', spec_short: 'ロードバイク / 16段変速 / カーボン', spec_long: '軽量カーボンフレームの本格ロード。週末のロングライドにおすすめ。', price_monthly: 9800, frame_no: 'VN-RD-0004', insurance: '2027-08-31', stock: 1, note: '', photos: '[]' },
+  { id: 'BK01', name: 'Vianova City 7', emoji: '🚲', spec_short: '7段変速 / 27インチ / 軽量アルミ', spec_long: '通勤通学にぴったりのシティクロス。7段変速で坂道も快適。LEDライト・カゴ標準装備。', price_monthly: 3800, frame_no: 'VN-CITY-0001', insurance: '2027-03-31', color: 'ホワイト', security_no: '大阪 あ 10001', note: '', photos: '[]', rented: 0 },
+  { id: 'BK02', name: 'Vianova E-Power', emoji: '⚡', spec_short: '電動アシスト / 走行60km / 大容量バッテリー', spec_long: '坂道もすいすい進む電動アシスト。1回の充電で約60km。買い物にも通勤にも。', price_monthly: 7200, frame_no: 'VN-EP-0002', insurance: '2027-05-31', color: 'ブラック', security_no: '大阪 あ 10002', note: '', photos: '[]', rented: 0 },
+  { id: 'BK03', name: 'Vianova Mini Fold', emoji: '🛴', spec_short: '折りたたみ / 20インチ / 輪行可', spec_long: 'コンパクトに折りたためる人気モデル。電車との組み合わせや車載にも便利。', price_monthly: 4500, frame_no: 'VN-MF-0003', insurance: '2027-01-31', color: 'レッド', security_no: '大阪 あ 10003', note: '', photos: '[]', rented: 0 },
+  { id: 'BK04', name: 'Vianova Road S', emoji: '🚴', spec_short: 'ロードバイク / 16段変速 / カーボン', spec_long: '軽量カーボンフレームの本格ロード。週末のロングライドにおすすめ。', price_monthly: 9800, frame_no: 'VN-RD-0004', insurance: '2027-08-31', color: 'ネイビー', security_no: '大阪 あ 10004', note: '', photos: '[]', rented: 0 },
 ];
 
 const SEED_NEWS = [

@@ -32,6 +32,8 @@ export default function Cert() {
               <Row k={t('certStart')} v={fmtDate(r.startedAt)} />
               <Row k={t('certBikename')} v={r.bikeName} />
               <Row k={t('certSpec')} v={r.specShort || '—'} />
+              <Row k={t('labelColor')} v={r.bikeColor || '—'} />
+              <Row k={t('labelSecurityNo')} v={r.bikeSecurityNo || '—'} />
               <Row k={t('certPrice')} v={`${yen(r.priceMonthly)} ${t('perMonth')}`} />
               <Row k={t('certHolder')} v={r.customerName} last={!r.storeName} />
               {r.storeName ? (

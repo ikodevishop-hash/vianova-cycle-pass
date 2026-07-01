@@ -161,6 +161,9 @@ const zh: Dict = {
   storeHours: '营业时间',
   storeHoliday: '定休日',
   holidayNone: '无',
+
+  labelColor: '颜色',
+  labelSecurityNo: '防盗登记号',
 };
 
 export default zh;

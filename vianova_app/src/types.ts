@@ -7,7 +7,7 @@
  * end to end.
  */
 
-/** A rentable bike registered by the operator. */
+/** A rentable bike registered by the operator (1 record = 1 physical unit). */
 export interface Bike {
   id: string;
   name: string;
@@ -23,8 +23,12 @@ export interface Bike {
   frameNo: string;
   /** Insurance expiry (YYYY-MM-DD). */
   insurance: string;
-  /** Units in stock. */
-  stock: number;
+  /** Body color. */
+  color: string;
+  /** Anti-theft registration number (防犯登録番号). */
+  securityNo: string;
+  /** Whether this unit is currently rented out. */
+  rented: boolean;
   /** Free-form operator note. */
   note: string;
   /** Data-URI / remote photo URLs (max 4). */
@@ -68,6 +72,9 @@ export interface Rental {
   idPhoto: string;
   /** ISO timestamp of when the rental started. */
   startedAt: string;
+  /** Snapshot of the rented bike's color and anti-theft registration number. */
+  bikeColor: string;
+  bikeSecurityNo: string;
   /** Snapshot of the reception store chosen at checkout. */
   storeId: string;
   storeName: string;

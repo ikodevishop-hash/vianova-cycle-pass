@@ -177,6 +177,10 @@ const ja = {
   storeHours: '営業時間',
   storeHoliday: '定休日',
   holidayNone: 'なし',
+
+  // bike color / anti-theft registration
+  labelColor: 'カラー',
+  labelSecurityNo: '防犯登録番号',
 };
 
 export type Dict = typeof ja;

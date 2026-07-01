@@ -164,6 +164,9 @@ const en: Dict = {
   storeHours: 'Business hours',
   storeHoliday: 'Closed days',
   holidayNone: 'None',
+
+  labelColor: 'Color',
+  labelSecurityNo: 'Anti-theft reg. no.',
 };
 
 export default en;

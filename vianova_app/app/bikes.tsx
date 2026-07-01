@@ -28,7 +28,7 @@ export default function Bikes() {
         ) : (
           bikes.map((b) => {
             const renting = rentedIds.includes(b.id);
-            const soldOut = b.stock <= 0 && !renting;
+            const soldOut = b.rented && !renting;
             const locked = renting || soldOut;
             return (
               <Pressable

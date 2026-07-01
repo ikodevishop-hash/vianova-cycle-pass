@@ -229,7 +229,8 @@
               <div class="full"><label>詳しいスペック</label><textarea id="bk-speclong" placeholder="フレーム素材、装備、対象用途など"></textarea></div>
               <div><label>車体番号</label><input type="text" id="bk-frame" placeholder="VN-CITY-0001"></div>
               <div><label>保険期限</label><input type="date" id="bk-insurance"></div>
-              <div><label>レンタル台数（在庫）</label><input type="number" id="bk-stock" placeholder="4" min="0"></div>
+              <div><label>カラー</label><input type="text" id="bk-color" placeholder="ホワイト / ブラック など"></div>
+              <div><label>防犯登録番号</label><input type="text" id="bk-securityno" placeholder="例：大阪 あ 12345"></div>
               <div><label>絵文字アイコン（写真なしの場合）</label><input type="text" id="bk-emoji" placeholder="🚲" maxlength="2"></div>
               <div class="full"><label>備考</label><textarea id="bk-note" placeholder="メモ・特記事項"></textarea></div>
             </div>
@@ -480,12 +481,14 @@ async function renderBikeList(){
   const { bikes } = await api('/api/admin/bikes');
   const wrap=$('bk-table');
   if(!bikes.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">🚲</div><p>まだ自転車が登録されていません。</p></div>'; return; }
-  wrap.innerHTML=`<table class="table"><thead><tr><th>写真</th><th>自転車名</th><th>月額</th><th>車体番号</th><th>保険期限</th><th>在庫</th><th></th></tr></thead><tbody>
+  wrap.innerHTML=`<table class="table"><thead><tr><th>写真</th><th>自転車名</th><th>カラー</th><th>月額</th><th>車体番号</th><th>防犯登録番号</th><th>保険期限</th><th>状態</th><th></th></tr></thead><tbody>
     ${bikes.map(b=>`<tr class="click" data-bk="${b.id}">
       <td>${b.photos&&b.photos[0]?`<img src="${b.photos[0]}" style="width:46px;height:46px;object-fit:cover;border-radius:8px">`:`<span style="font-size:24px">${b.emoji||'🚲'}</span>`}</td>
       <td><b>${b.name}</b><br><span style="color:var(--muted);font-size:12px">${b.specShort||''}</span></td>
+      <td>${b.color||'—'}</td>
       <td>¥${(b.priceMonthly||0).toLocaleString()}/月</td>
-      <td class="mono">${b.frameNo||'—'}</td><td>${b.insurance||'—'}</td><td>${b.stock||0}台</td>
+      <td class="mono">${b.frameNo||'—'}</td><td class="mono">${b.securityNo||'—'}</td><td>${b.insurance||'—'}</td>
+      <td>${b.rented?'<span class="chip amber">貸出中</span>':'<span class="chip green">貸出可</span>'}</td>
       <td style="color:#BFCBC8">›</td></tr>`).join('')}
   </tbody></table>`;
   wrap.querySelectorAll('[data-bk]').forEach(tr=>tr.onclick=()=>editBike(tr.dataset.bk));
@@ -506,7 +509,7 @@ function pickPhoto(i){
   inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{bikePhotos[i]=r.result;renderPhotoSlots();};r.readAsDataURL(f);};
   inp.click();
 }
-function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-stock','bk-emoji','bk-note'].forEach(x=>$(x).value=''); $('bk-err').textContent=''; renderPhotoSlots(); }
+function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-color','bk-securityno','bk-emoji','bk-note'].forEach(x=>$(x).value=''); $('bk-err').textContent=''; renderPhotoSlots(); }
 $('bk-new').onclick=()=>{ editingBikeId=null; $('bk-form-title').textContent='自転車の新規登録'; $('bk-delete').style.display='none'; clearBikeForm(); goView('v-bike-form'); };
 async function editBike(id){
   let b = bikeCache.find(x=>x.id===id);
@@ -516,7 +519,7 @@ async function editBike(id){
   bikePhotos=(b.photos||[]).slice();
   $('bk-name').value=b.name||''; $('bk-price').value=b.priceMonthly||''; $('bk-specshort').value=b.specShort||'';
   $('bk-speclong').value=b.specLong||''; $('bk-frame').value=b.frameNo||''; $('bk-insurance').value=b.insurance||'';
-  $('bk-stock').value=b.stock||0; $('bk-emoji').value=b.emoji||''; $('bk-note').value=b.note||''; $('bk-err').textContent='';
+  $('bk-color').value=b.color||''; $('bk-securityno').value=b.securityNo||''; $('bk-emoji').value=b.emoji||''; $('bk-note').value=b.note||''; $('bk-err').textContent='';
   renderPhotoSlots(); goView('v-bike-form');
 }
 $('bk-cancel').onclick=back;
@@ -525,7 +528,7 @@ $('bk-save').onclick=async()=>{
   const body={ name:$('bk-name').value.trim(), priceMonthly:parseInt($('bk-price').value,10),
     specShort:$('bk-specshort').value.trim(), specLong:$('bk-speclong').value.trim(),
     frameNo:$('bk-frame').value.trim(), insurance:$('bk-insurance').value,
-    stock:parseInt($('bk-stock').value,10)||0, emoji:$('bk-emoji').value.trim()||'🚲',
+    color:$('bk-color').value.trim(), securityNo:$('bk-securityno').value.trim(), emoji:$('bk-emoji').value.trim()||'🚲',
     note:$('bk-note').value.trim(), photos:bikePhotos.slice() };
   if(!body.name||!body.specShort||!body.priceMonthly){ err.textContent='自転車名・月額・簡単なスペックは必須です。'; return; }
   try {

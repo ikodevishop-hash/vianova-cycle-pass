@@ -23,6 +23,7 @@ db.exec(`
     id TEXT PRIMARY KEY,
     name TEXT, emoji TEXT, spec_short TEXT, spec_long TEXT,
     price_monthly INTEGER, frame_no TEXT, insurance TEXT,
+    color TEXT, security_no TEXT, rented INTEGER DEFAULT 0,
     stock INTEGER, note TEXT, photos TEXT
   );
   CREATE TABLE IF NOT EXISTS rentals (
@@ -50,16 +51,20 @@ function ensureColumn(table, col, type) {
   const cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
   if (!cols.includes(col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
 }
-// Rentals snapshot the reception store so certificates stay stable if a store changes.
-for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'store_hours', 'store_holiday']) {
+// Rentals snapshot the reception store + bike details so certificates stay stable.
+for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'store_hours', 'store_holiday', 'bike_color', 'bike_security_no']) {
   ensureColumn('rentals', col, 'TEXT');
 }
+// Bikes: color / anti-theft registration no. / rented flag (1 record = 1 unit).
+ensureColumn('bikes', 'color', 'TEXT');
+ensureColumn('bikes', 'security_no', 'TEXT');
+ensureColumn('bikes', 'rented', 'INTEGER DEFAULT 0');
 
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {
   const ins = db.prepare(`INSERT INTO bikes
-    (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,stock,note,photos)
-    VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@stock,@note,@photos)`);
+    (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,note,photos)
+    VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,@rented,@note,@photos)`);
   for (const b of SEED_BIKES) ins.run(b);
 });
 if (db.prepare('SELECT COUNT(*) c FROM bikes').get().c === 0) seedBikes();

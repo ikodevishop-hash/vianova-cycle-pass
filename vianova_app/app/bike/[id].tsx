@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { TopBar } from '../../src/components/TopBar';
 import { Btn, Card } from '../../src/components/ui';
 import { findBike, useDB } from '../../src/store';
-import { stockText, yen } from '../../src/format';
+import { yen } from '../../src/format';
 import { C, R } from '../../src/theme';
 
 export default function BikeDetail() {
@@ -67,8 +67,8 @@ export default function BikeDetail() {
 
         <Card style={{ marginTop: 14 }}>
           <SpecRow k={t('specFeature')} v={bike.specLong || bike.specShort || '—'} />
-          <SpecRow k={t('specPrice')} v={`${yen(bike.priceMonthly)} ${t('perMonth')}`} />
-          <SpecRow k={t('specStock')} v={bike.stock > 0 ? stockText(bike.stock) : t('stockNone')} last />
+          <SpecRow k={t('labelColor')} v={bike.color || '—'} />
+          <SpecRow k={t('specPrice')} v={`${yen(bike.priceMonthly)} ${t('perMonth')}`} last />
         </Card>
 
         <Btn

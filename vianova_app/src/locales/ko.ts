@@ -164,6 +164,9 @@ const ko: Dict = {
   storeHours: '영업시간',
   storeHoliday: '정기휴무',
   holidayNone: '없음',
+
+  labelColor: '색상',
+  labelSecurityNo: '방범 등록번호',
 };
 
 export default ko;
