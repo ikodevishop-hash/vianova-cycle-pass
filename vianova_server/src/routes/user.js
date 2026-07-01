@@ -116,7 +116,10 @@ router.get('/news', authUser, (req, res) => {
 });
 
 router.get('/rentals', authUser, (req, res) => {
-  const rows = db.prepare('SELECT * FROM rentals WHERE member_id=? ORDER BY started_at DESC').all(req.memberId);
+  // Only active (not returned) rentals — the certificate is for bikes currently rented.
+  const rows = db
+    .prepare("SELECT * FROM rentals WHERE member_id=? AND (returned_at IS NULL OR returned_at='') ORDER BY started_at DESC")
+    .all(req.memberId);
   res.json({ rentals: rows.map(mapRental) });
 });
 

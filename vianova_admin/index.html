@@ -315,6 +315,24 @@
   </div>
 </div>
 
+<!-- rental (貸出) modal -->
+<div class="modal" id="modal-rent">
+  <div class="box">
+    <h3>レンタルを登録（貸出）</h3>
+    <p class="sub" id="rent-to" style="color:var(--muted);font-size:13px;margin:2px 0 14px"></p>
+    <label>自転車 <span style="color:var(--persimmon)">*</span></label><select id="rent-bike"></select>
+    <label>受付店舗</label><select id="rent-store"></select>
+    <label>お名前 <span style="color:var(--persimmon)">*</span></label><input type="text" id="rent-name" placeholder="山田 太郎">
+    <div class="grid2" style="margin-top:0">
+      <div><label>生年月日</label><input type="text" id="rent-birth" placeholder="1990-01-01"></div>
+      <div><label>電話番号</label><input type="text" id="rent-tel" placeholder="090-1234-5678"></div>
+    </div>
+    <label>住所</label><input type="text" id="rent-addr" placeholder="〇〇県〇〇市…">
+    <div class="err" id="rent-err"></div>
+    <div class="row-actions"><button class="btn btn-primary" id="rent-go">貸出する</button><button class="btn btn-ghost" id="rent-cancel">閉じる</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -438,7 +456,12 @@ async function openCustomer(memberId){
   const { customer:u, rentals } = await api('/api/admin/customers/'+encodeURIComponent(memberId));
   const r0 = rentals[0];
   const idPhoto = r0 && r0.idPhoto ? `<img class="idphoto" src="${r0.idPhoto}" alt="本人確認書類">` : '<span style="color:var(--muted)">（レンタル申込時に登録されます）</span>';
-  const rentalRows = rentals.length ? rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}/月</td><td>${fmtDate(r.startedAt)}</td></tr>`).join('') : '<tr><td colspan="4" style="color:var(--muted)">レンタルはありません</td></tr>';
+  const rentalRows = rentals.length ? rentals.map(r=>{
+    const active=!r.returnedAt;
+    const status = active ? '<span class="chip green">レンタル中</span>' : `<span class="chip gray">返却済 ${fmtDate(r.returnedAt)}</span>`;
+    const op = active ? `<button class="btn btn-danger btn-sm" data-return="${r.rentalId}">返却</button>` : '—';
+    return `<tr><td class="mono">${r.rentalId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}/月</td><td>${fmtDate(r.startedAt)}</td><td>${status}</td><td>${op}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" style="color:var(--muted)">レンタルはありません</td></tr>';
   $('cust-detail-body').innerHTML=`
     <div class="panel"><div class="ph"><h2>会員 ${u.memberId}</h2><button class="btn btn-primary btn-sm" id="cd-news">📣 お知らせを送る</button></div>
       <div class="pb"><div class="kv">
@@ -450,14 +473,16 @@ async function openCustomer(memberId){
         <div class="k">生年月日</div><div class="v">${r0?r0.birthdate:'—'}</div>
         <div class="k">住所</div><div class="v">${r0?r0.address:'—'}</div>
         <div class="k">電話番号</div><div class="v">${r0?r0.phone:'—'}</div>
-        <div class="k">レンタル中の自転車</div><div class="v">${rentals.map(r=>r.bikeName).join(' , ')||'—'}</div>
+        <div class="k">レンタル中の自転車</div><div class="v">${rentals.filter(r=>!r.returnedAt).map(r=>r.bikeName).join(' , ')||'—'}</div>
       </div>
       <label style="margin-top:18px">本人確認書類</label>${idPhoto}</div>
     </div>
-    <div class="panel"><div class="ph"><h2>レンタル履歴</h2></div>
-      <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
+    <div class="panel"><div class="ph"><h2>レンタル履歴</h2><button class="btn btn-primary btn-sm" id="cd-rent">＋ レンタルを登録（貸出）</button></div>
+      <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th><th>状態</th><th>操作</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
     </div>`;
   $('cd-news').onclick=()=>openNewsModal(memberId);
+  $('cd-rent').onclick=()=>openRentModal(memberId, r0?r0.customerName:'');
+  $('cust-detail-body').querySelectorAll('[data-return]').forEach(b=>b.onclick=()=>returnRental(b.dataset.return, memberId));
   goView('v-cust-detail');
 }
 
@@ -475,6 +500,38 @@ $('news-send').onclick=async()=>{
     $('modal-news').classList.remove('on'); toast('お知らせを送信しました'); }
   catch{ toast('送信に失敗しました'); }
 };
+
+/* rental (貸出) + return (返却) from the customer detail */
+async function openRentModal(memberId, name){
+  let bikes=[], stores=[];
+  try { ({bikes}=await api('/api/admin/bikes')); ({stores}=await api('/api/admin/stores')); }
+  catch{ toast('読み込みに失敗しました'); return; }
+  const avail=bikes.filter(b=>!b.rented);
+  $('rent-bike').innerHTML = avail.length
+    ? avail.map(b=>`<option value="${b.id}">${b.name}（${b.color||'—'}）／¥${(b.priceMonthly||0).toLocaleString()}/月</option>`).join('')
+    : '<option value="">（貸出可能な自転車がありません）</option>';
+  $('rent-store').innerHTML = '<option value="">（受付店舗を選択）</option>' + stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  $('rent-name').value=name||''; $('rent-birth').value=''; $('rent-addr').value=''; $('rent-tel').value=''; $('rent-err').textContent='';
+  $('modal-rent').dataset.member=memberId;
+  $('rent-to').textContent=`会員 ${memberId} に貸し出します`;
+  $('modal-rent').classList.add('on');
+}
+$('rent-cancel').onclick=()=>$('modal-rent').classList.remove('on');
+$('rent-go').onclick=async()=>{
+  const memberId=$('modal-rent').dataset.member;
+  const err=$('rent-err'); err.textContent='';
+  const body={ memberId, bikeId:$('rent-bike').value, storeId:$('rent-store').value,
+    name:$('rent-name').value.trim(), birth:$('rent-birth').value.trim(), addr:$('rent-addr').value.trim(), tel:$('rent-tel').value.trim() };
+  if(!body.bikeId){ err.textContent='貸出できる自転車がありません。'; return; }
+  if(!body.name){ err.textContent='お名前を入力してください。'; return; }
+  try { await api('/api/admin/rentals',{method:'POST',body}); $('modal-rent').classList.remove('on'); toast('レンタルを登録しました'); openCustomer(memberId); }
+  catch(e){ err.textContent = e.message==='BIKE_UNAVAILABLE' ? 'その自転車は貸出中です。' : '登録に失敗しました。'; }
+};
+async function returnRental(rentalId, memberId){
+  if(!confirm('この自転車を返却済みにしますか？（自転車が貸出可に戻ります）')) return;
+  try { await api('/api/admin/rentals/'+rentalId+'/return',{method:'POST'}); toast('返却しました'); openCustomer(memberId); }
+  catch{ toast('返却に失敗しました'); }
+}
 
 /* ===== bikes ===== */
 async function renderBikeList(){
@@ -623,8 +680,8 @@ async function renderRentals(){
   const { rentals } = await api('/api/admin/rentals'); rentalsCache=rentals;
   const wrap=$('rt-table');
   if(!rentals.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">📊</div><p>レンタルはまだありません。</p></div>'; return; }
-  wrap.innerHTML=`<table class="table"><thead><tr><th>レンタルID</th><th>顧客</th><th>会員ID</th><th>自転車</th><th>月額</th><th>レンタル日</th></tr></thead><tbody>
-    ${rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.customerName||'—'}</td><td class="mono">${r.memberId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}</td><td>${fmtDate(r.startedAt)}</td></tr>`).join('')}
+  wrap.innerHTML=`<table class="table"><thead><tr><th>レンタルID</th><th>顧客</th><th>会員ID</th><th>自転車</th><th>月額</th><th>レンタル日</th><th>状態</th></tr></thead><tbody>
+    ${rentals.map(r=>`<tr><td class="mono">${r.rentalId}</td><td>${r.customerName||'—'}</td><td class="mono">${r.memberId}</td><td>${r.bikeName}</td><td>¥${(r.priceMonthly||0).toLocaleString()}</td><td>${fmtDate(r.startedAt)}</td><td>${r.returnedAt?`<span class="chip gray">返却済 ${fmtDate(r.returnedAt)}</span>`:'<span class="chip green">レンタル中</span>'}</td></tr>`).join('')}
   </tbody></table>`;
 }
 $('rt-csv').onclick=()=>{

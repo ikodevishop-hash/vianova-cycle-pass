@@ -52,7 +52,8 @@ function ensureColumn(table, col, type) {
   if (!cols.includes(col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
 }
 // Rentals snapshot the reception store + bike details so certificates stay stable.
-for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'store_hours', 'store_holiday', 'bike_color', 'bike_security_no']) {
+// returned_at: empty/NULL = active (レンタル中), set = returned (返却済み).
+for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'store_hours', 'store_holiday', 'bike_color', 'bike_security_no', 'returned_at']) {
   ensureColumn('rentals', col, 'TEXT');
 }
 // Bikes: color / anti-theft registration no. / rented flag (1 record = 1 unit).
