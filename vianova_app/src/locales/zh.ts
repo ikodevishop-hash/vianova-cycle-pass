@@ -151,6 +151,16 @@ const zh: Dict = {
   backToLogin: '返回登录',
   serverSettings: '服务器连接设置',
   serverUrl: '服务器URL',
+
+  labelStore: '受理店铺',
+  phStore: '请选择受理店铺',
+  errStore: '请选择受理店铺。',
+  storeName: '店铺名称',
+  storeAddress: '地址',
+  storePhone: '电话',
+  storeHours: '营业时间',
+  storeHoliday: '定休日',
+  holidayNone: '无',
 };
 
 export default zh;

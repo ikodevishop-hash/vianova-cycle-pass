@@ -5,7 +5,7 @@ const db = require('../db');
 const config = require('../config');
 const { signUser, authUser, newToken } = require('../auth');
 const { sendVerifyMail, mailMode } = require('../mail');
-const { mapBike, mapRental, mapNews, reAlnum, reEmail, validPw, genRentalId } = require('../util');
+const { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId } = require('../util');
 
 const router = express.Router();
 
@@ -103,6 +103,10 @@ router.get('/terms', (_req, res) => {
   res.json({ terms });
 });
 
+router.get('/stores', (_req, res) => {
+  res.json({ stores: db.prepare('SELECT * FROM stores ORDER BY name').all().map(mapStore) });
+});
+
 /* ---------- member data (auth) ---------- */
 router.get('/news', authUser, (req, res) => {
   const rows = db
@@ -117,20 +121,25 @@ router.get('/rentals', authUser, (req, res) => {
 });
 
 router.post('/rentals', authUser, (req, res) => {
-  const { bikeId, name, birth, addr, tel, idPhoto } = req.body || {};
+  const { bikeId, storeId, name, birth, addr, tel, idPhoto } = req.body || {};
   const bike = db.prepare('SELECT * FROM bikes WHERE id=?').get(String(bikeId || ''));
   if (!bike) return res.status(404).json({ error: 'BIKE_NOT_FOUND' });
   if (!name || !birth || !addr || !tel || !idPhoto) return res.status(400).json({ error: 'INVALID_FIELDS' });
+  // Snapshot the chosen reception store (if any) so the certificate stays stable.
+  const store = storeId ? db.prepare('SELECT * FROM stores WHERE id=?').get(String(storeId)) : null;
 
   const rentalId = genRentalId();
   const tx = db.transaction(() => {
     db.prepare(
       `INSERT INTO rentals (rental_id,member_id,bike_id,bike_name,spec_short,price_monthly,
-        customer_name,birthdate,address,phone,id_photo,started_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+        customer_name,birthdate,address,phone,id_photo,started_at,
+        store_id,store_name,store_address,store_phone,store_hours,store_holiday)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).run(
       rentalId, req.memberId, bike.id, bike.name, bike.spec_short, bike.price_monthly,
       String(name), String(birth), String(addr), String(tel), String(idPhoto), new Date().toISOString(),
+      store ? store.id : '', store ? store.name : '', store ? store.address : '',
+      store ? store.phone : '', store ? store.hours : '', store ? (store.holiday || '') : '',
     );
     db.prepare('UPDATE bikes SET stock = MAX(0, stock - 1) WHERE id=?').run(bike.id);
   });

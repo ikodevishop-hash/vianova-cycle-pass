@@ -33,7 +33,19 @@ export default function Cert() {
               <Row k={t('certBikename')} v={r.bikeName} />
               <Row k={t('certSpec')} v={r.specShort || '—'} />
               <Row k={t('certPrice')} v={`${yen(r.priceMonthly)} ${t('perMonth')}`} />
-              <Row k={t('certHolder')} v={r.customerName} last />
+              <Row k={t('certHolder')} v={r.customerName} last={!r.storeName} />
+              {r.storeName ? (
+                <>
+                  <Text style={{ marginTop: 14, marginBottom: 2, fontSize: 13, fontWeight: '700', color: C.ink }}>
+                    {t('labelStore')}
+                  </Text>
+                  <Row k={t('storeName')} v={r.storeName} />
+                  <Row k={t('storeAddress')} v={r.storeAddress || '—'} />
+                  <Row k={t('storePhone')} v={r.storePhone || '—'} />
+                  <Row k={t('storeHours')} v={r.storeHours || '—'} />
+                  <Row k={t('storeHoliday')} v={r.storeHoliday || t('holidayNone')} last />
+                </>
+              ) : null}
             </Card>
           ))
         )}

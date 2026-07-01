@@ -41,6 +41,17 @@ export interface User {
   createdAt: string;
 }
 
+/** A rental reception store, managed in the admin. */
+export interface Store {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  hours: string;
+  /** Regular holiday; empty string = none (定休日なし). */
+  holiday: string;
+}
+
 /** An active rental contract created at checkout. */
 export interface Rental {
   rentalId: string;
@@ -57,6 +68,13 @@ export interface Rental {
   idPhoto: string;
   /** ISO timestamp of when the rental started. */
   startedAt: string;
+  /** Snapshot of the reception store chosen at checkout. */
+  storeId: string;
+  storeName: string;
+  storeAddress: string;
+  storePhone: string;
+  storeHours: string;
+  storeHoliday: string;
 }
 
 /** An announcement; `target` empty = broadcast, otherwise a memberId. */
@@ -72,6 +90,8 @@ export interface NewsItem {
 /** In-flight rental application carried from the form to the payment screen. */
 export interface RentalDraft {
   bikeId: string;
+  /** Chosen reception store id. */
+  storeId: string;
   name: string;
   birth: string;
   addr: string;

@@ -11,8 +11,13 @@ const mapRental = (r) => ({
   rentalId: r.rental_id, memberId: r.member_id, bikeId: r.bike_id, bikeName: r.bike_name,
   specShort: r.spec_short, priceMonthly: r.price_monthly, customerName: r.customer_name,
   birthdate: r.birthdate, address: r.address, phone: r.phone, idPhoto: r.id_photo, startedAt: r.started_at,
+  storeId: r.store_id || '', storeName: r.store_name || '', storeAddress: r.store_address || '',
+  storePhone: r.store_phone || '', storeHours: r.store_hours || '', storeHoliday: r.store_holiday || '',
 });
 const mapNews = (r) => ({ id: r.id, date: r.date, title: r.title, body: r.body, target: r.target });
+const mapStore = (r) => ({
+  id: r.id, name: r.name, address: r.address, phone: r.phone, hours: r.hours, holiday: r.holiday || '',
+});
 
 /** Validators (mirrors the app/prototype rules). */
 const reAlnum = (s) => /^[A-Za-z0-9]+$/.test(s);
@@ -27,4 +32,4 @@ function genRentalId() {
   return exists ? genRentalId() : s;
 }
 
-module.exports = { mapBike, mapRental, mapNews, reAlnum, reEmail, validPw, genRentalId };
+module.exports = { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId };

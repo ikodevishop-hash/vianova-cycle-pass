@@ -3,7 +3,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { signAdmin, authAdmin } = require('../auth');
-const { mapBike, mapRental } = require('../util');
+const { mapBike, mapRental, mapStore } = require('../util');
 
 const router = express.Router();
 const LANGS = ['ja', 'en', 'zh', 'ko'];
@@ -118,6 +118,43 @@ router.put('/terms', (req, res) => {
     }
   });
   tx();
+  res.json({ ok: true });
+});
+
+/* ---------- reception stores CRUD ---------- */
+router.get('/stores', (_req, res) => {
+  res.json({ stores: db.prepare('SELECT * FROM stores ORDER BY name').all().map(mapStore) });
+});
+
+function storeParams(body) {
+  return {
+    name: String(body.name || '').trim(),
+    address: String(body.address || '').trim(),
+    phone: String(body.phone || '').trim(),
+    hours: String(body.hours || '').trim(),
+    // Empty holiday = "定休日なし" (no regular holiday).
+    holiday: String(body.holiday || '').trim(),
+  };
+}
+
+router.post('/stores', (req, res) => {
+  const p = storeParams(req.body);
+  if (!p.name) return res.status(400).json({ error: 'INVALID_FIELDS' });
+  const id = 'ST' + Date.now();
+  db.prepare('INSERT INTO stores (id,name,address,phone,hours,holiday) VALUES (@id,@name,@address,@phone,@hours,@holiday)').run({ id, ...p });
+  res.json({ store: mapStore(db.prepare('SELECT * FROM stores WHERE id=?').get(id)) });
+});
+
+router.put('/stores/:id', (req, res) => {
+  if (!db.prepare('SELECT 1 FROM stores WHERE id=?').get(req.params.id)) return res.status(404).json({ error: 'NOT_FOUND' });
+  const p = storeParams(req.body);
+  if (!p.name) return res.status(400).json({ error: 'INVALID_FIELDS' });
+  db.prepare('UPDATE stores SET name=@name,address=@address,phone=@phone,hours=@hours,holiday=@holiday WHERE id=@id').run({ id: req.params.id, ...p });
+  res.json({ store: mapStore(db.prepare('SELECT * FROM stores WHERE id=?').get(req.params.id)) });
+});
+
+router.delete('/stores/:id', (req, res) => {
+  db.prepare('DELETE FROM stores WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });
 

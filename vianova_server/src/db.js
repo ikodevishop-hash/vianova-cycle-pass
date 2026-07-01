@@ -4,7 +4,7 @@ const path = require('path');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const config = require('./config');
-const { SEED_BIKES, SEED_NEWS, SEED_TERMS } = require('./seed');
+const { SEED_BIKES, SEED_NEWS, SEED_TERMS, SEED_STORES } = require('./seed');
 
 fs.mkdirSync(config.dataDir, { recursive: true });
 const db = new Database(path.join(config.dataDir, 'vianova.db'));
@@ -37,10 +37,23 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS terms (
     lang TEXT PRIMARY KEY, text TEXT
   );
+  CREATE TABLE IF NOT EXISTS stores (
+    id TEXT PRIMARY KEY, name TEXT, address TEXT, phone TEXT, hours TEXT, holiday TEXT
+  );
   CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY, value TEXT
   );
 `);
+
+// ----- lightweight migrations (add columns to existing DBs) -----
+function ensureColumn(table, col, type) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
+  if (!cols.includes(col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
+}
+// Rentals snapshot the reception store so certificates stay stable if a store changes.
+for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'store_hours', 'store_holiday']) {
+  ensureColumn('rentals', col, 'TEXT');
+}
 
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {
@@ -62,6 +75,12 @@ const seedTerms = db.transaction(() => {
   for (const [lang, text] of Object.entries(SEED_TERMS)) ins.run(lang, text);
 });
 seedTerms();
+
+const seedStores = db.transaction(() => {
+  const ins = db.prepare('INSERT INTO stores (id,name,address,phone,hours,holiday) VALUES (@id,@name,@address,@phone,@hours,@holiday)');
+  for (const s of SEED_STORES) ins.run(s);
+});
+if (db.prepare('SELECT COUNT(*) c FROM stores').get().c === 0) seedStores();
 
 // Admin password (hashed) — seeded once.
 if (!db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_hash')) {

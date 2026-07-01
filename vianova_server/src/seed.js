@@ -83,4 +83,10 @@ const TERMS_KO = `■ 고장・파손
 
 const SEED_TERMS = { ja: TERMS_JA, en: TERMS_EN, zh: TERMS_ZH, ko: TERMS_KO };
 
-module.exports = { SEED_BIKES, SEED_NEWS, SEED_TERMS };
+// 受付店舗（holiday が空文字 = 定休日なし）
+const SEED_STORES = [
+  { id: 'ST01', name: 'Vianova 大阪本店', address: '大阪府大阪市中央区大手前1-1', phone: '06-1234-5678', hours: '10:00〜19:00', holiday: '毎週水曜' },
+  { id: 'ST02', name: 'Vianova 難波店', address: '大阪府大阪市中央区難波2-2-2', phone: '06-8765-4321', hours: '09:00〜20:00', holiday: '' },
+];
+
+module.exports = { SEED_BIKES, SEED_NEWS, SEED_TERMS, SEED_STORES };

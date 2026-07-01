@@ -154,6 +154,16 @@ const en: Dict = {
   backToLogin: 'Back to login',
   serverSettings: 'Server settings',
   serverUrl: 'Server URL',
+
+  labelStore: 'Pickup store',
+  phStore: 'Select a pickup store',
+  errStore: 'Please select a pickup store.',
+  storeName: 'Store name',
+  storeAddress: 'Address',
+  storePhone: 'Phone',
+  storeHours: 'Business hours',
+  storeHoliday: 'Closed days',
+  holidayNone: 'None',
 };
 
 export default en;

@@ -4,10 +4,11 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { TopBar } from '../src/components/TopBar';
 import { Btn, Card, Field } from '../src/components/ui';
 import { useToast } from '../src/components/toast';
-import { findBike, setDraft, useDB } from '../src/store';
+import { findBike, getStores, setDraft, useDB } from '../src/store';
 import { C, R } from '../src/theme';
 
 export default function Apply() {
@@ -17,11 +18,13 @@ export default function Apply() {
   const { bikeId } = useLocalSearchParams<{ bikeId: string }>();
   useDB();
   const bike = findBike(bikeId ?? '');
+  const stores = getStores();
 
   const [name, setName] = useState('');
   const [birth, setBirth] = useState('');
   const [addr, setAddr] = useState('');
   const [tel, setTel] = useState('');
+  const [storeId, setStoreId] = useState('');
   const [idPhoto, setIdPhoto] = useState<string | null>(null);
   const [err, setErr] = useState('');
 
@@ -55,12 +58,16 @@ export default function Apply() {
       setErr(t('errAllFields'));
       return;
     }
+    if (stores.length > 0 && !storeId) {
+      setErr(t('errStore'));
+      return;
+    }
     if (!idPhoto) {
       setErr(t('errIdPhoto'));
       return;
     }
     if (!bike) return;
-    setDraft({ bikeId: bike.id, name: name.trim(), birth: birth.trim(), addr: addr.trim(), tel: tel.trim(), idPhoto });
+    setDraft({ bikeId: bike.id, storeId, name: name.trim(), birth: birth.trim(), addr: addr.trim(), tel: tel.trim(), idPhoto });
     router.push('/payment' as never);
   };
 
@@ -85,6 +92,51 @@ export default function Apply() {
               keyboardType="phone-pad"
               placeholder="090-1234-5678"
             />
+
+            {stores.length > 0 ? (
+              <View style={{ marginBottom: 14 }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: C.ink, marginBottom: 6 }}>
+                  {t('labelStore')} *
+                </Text>
+                <View style={{ gap: 8 }}>
+                  {stores.map((s) => {
+                    const sel = s.id === storeId;
+                    return (
+                      <Pressable
+                        key={s.id}
+                        onPress={() => setStoreId(s.id)}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'flex-start',
+                          gap: 10,
+                          borderWidth: 1.5,
+                          borderColor: sel ? C.accent : C.line,
+                          borderRadius: R.sm,
+                          padding: 12,
+                          backgroundColor: sel ? C.accentPale : '#fff',
+                        }}
+                      >
+                        <Ionicons
+                          name={sel ? 'radio-button-on' : 'radio-button-off'}
+                          size={20}
+                          color={sel ? C.accent : C.muted}
+                          style={{ marginTop: 1 }}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontWeight: '700', color: C.ink, fontSize: 14 }}>{s.name}</Text>
+                          {s.address ? (
+                            <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{s.address}</Text>
+                          ) : null}
+                          <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>
+                            {t('storeHours')}: {s.hours || '—'}　/　{t('storeHoliday')}: {s.holiday || t('holidayNone')}
+                          </Text>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
 
             <Text style={{ fontSize: 13, fontWeight: '700', color: C.ink, marginBottom: 6 }}>
               {t('labelIdDoc')} *

@@ -7,13 +7,14 @@
  */
 import { useEffect, useState } from 'react';
 import { api, getToken, loadConfig, setToken } from './api';
-import { Bike, NewsItem, Rental, RentalDraft, User } from './types';
+import { Bike, NewsItem, Rental, RentalDraft, Store, User } from './types';
 import { currentLang, Lang } from './i18n';
 
 type Terms = Record<Lang, string>;
 interface Cache {
   user: User | null;
   bikes: Bike[];
+  stores: Store[];
   rentals: Rental[];
   news: NewsItem[];
   terms: Terms;
@@ -22,6 +23,7 @@ interface Cache {
 let cache: Cache = {
   user: null,
   bikes: [],
+  stores: [],
   rentals: [],
   news: [],
   terms: { ja: '', en: '', zh: '', ko: '' },
@@ -34,6 +36,9 @@ const emit = () => listeners.forEach((l) => l());
 /* ---------- loaders ---------- */
 async function loadBikes() {
   cache.bikes = (await api<{ bikes: Bike[] }>('/api/bikes', { auth: false })).bikes;
+}
+async function loadStores() {
+  cache.stores = (await api<{ stores: Store[] }>('/api/stores', { auth: false })).stores;
 }
 async function loadTerms() {
   cache.terms = { ...cache.terms, ...(await api<{ terms: Terms }>('/api/terms', { auth: false })).terms };
@@ -51,7 +56,7 @@ async function refreshMe() {
 /** Boot: load config + public data, and member data if a token is stored. */
 export async function hydrate(): Promise<void> {
   await loadConfig();
-  await Promise.allSettled([loadBikes(), loadTerms()]);
+  await Promise.allSettled([loadBikes(), loadStores(), loadTerms()]);
   if (getToken()) {
     try {
       await refreshMe();
@@ -66,13 +71,14 @@ export async function hydrate(): Promise<void> {
 
 /** Re-fetch everything currently relevant (e.g. after returning to home). */
 export async function reload(): Promise<void> {
-  await Promise.allSettled([loadBikes(), loadTerms()]);
+  await Promise.allSettled([loadBikes(), loadStores(), loadTerms()]);
   if (cache.user) await Promise.allSettled([loadRentals(), loadNews()]);
   emit();
 }
 
 /* ---------- selectors ---------- */
 export const getBikes = () => cache.bikes;
+export const getStores = () => cache.stores;
 export const getNews = () => cache.news;
 export const getTerms = () => cache.terms[currentLang()] || cache.terms.ja || '';
 export const getSession = () => cache.user?.memberId ?? null;
@@ -108,7 +114,7 @@ export async function login(memberId: string, password: string): Promise<void> {
   });
   await setToken(r.token);
   cache.user = r.user;
-  await Promise.allSettled([loadBikes(), loadRentals(), loadNews(), loadTerms()]);
+  await Promise.allSettled([loadBikes(), loadStores(), loadRentals(), loadNews(), loadTerms()]);
   emit();
 }
 
@@ -123,7 +129,7 @@ export async function logout(): Promise<void> {
 export async function createRental(d: RentalDraft): Promise<Rental> {
   const r = await api<{ rental: Rental }>('/api/rentals', {
     method: 'POST',
-    body: { bikeId: d.bikeId, name: d.name, birth: d.birth, addr: d.addr, tel: d.tel, idPhoto: d.idPhoto },
+    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, addr: d.addr, tel: d.tel, idPhoto: d.idPhoto },
   });
   await Promise.allSettled([loadBikes(), loadRentals()]);
   emit();

@@ -154,6 +154,16 @@ const ko: Dict = {
   backToLogin: '로그인 화면으로',
   serverSettings: '서버 연결 설정',
   serverUrl: '서버 URL',
+
+  labelStore: '접수 매장',
+  phStore: '접수 매장을 선택',
+  errStore: '접수 매장을 선택하세요.',
+  storeName: '매장명',
+  storeAddress: '주소',
+  storePhone: '전화번호',
+  storeHours: '영업시간',
+  storeHoliday: '정기휴무',
+  holidayNone: '없음',
 };
 
 export default ko;

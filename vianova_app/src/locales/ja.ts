@@ -166,6 +166,17 @@ const ja = {
   backToLogin: 'ログイン画面へ戻る',
   serverSettings: 'サーバー接続設定',
   serverUrl: 'サーバーURL',
+
+  // reception store
+  labelStore: '受付店舗',
+  phStore: '受付店舗を選択',
+  errStore: '受付店舗を選択してください。',
+  storeName: '店舗名',
+  storeAddress: '住所',
+  storePhone: '電話番号',
+  storeHours: '営業時間',
+  storeHoliday: '定休日',
+  holidayNone: 'なし',
 };
 
 export type Dict = typeof ja;
