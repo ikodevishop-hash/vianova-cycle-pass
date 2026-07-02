@@ -167,6 +167,13 @@ const ko: Dict = {
 
   labelColor: '색상',
   labelSecurityNo: '방범 등록번호',
+
+  unitYear: '년',
+  unitMonth: '월',
+  unitDay: '일',
+  labelPostal: '우편번호',
+  postalSearch: '주소 찾기',
+  postalNotFound: '주소를 찾을 수 없습니다. 직접 입력해 주세요.',
 };
 
 export default ko;

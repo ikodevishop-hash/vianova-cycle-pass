@@ -66,6 +66,8 @@ export interface Rental {
   priceMonthly: number;
   customerName: string;
   birthdate: string;
+  /** Postal code (郵便番号). */
+  postalCode: string;
   address: string;
   phone: string;
   /** Data-URI of the photographed ID document. */
@@ -101,6 +103,7 @@ export interface RentalDraft {
   storeId: string;
   name: string;
   birth: string;
+  postalCode: string;
   addr: string;
   tel: string;
   idPhoto: string;

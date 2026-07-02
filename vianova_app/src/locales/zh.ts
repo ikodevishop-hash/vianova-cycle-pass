@@ -164,6 +164,13 @@ const zh: Dict = {
 
   labelColor: '颜色',
   labelSecurityNo: '防盗登记号',
+
+  unitYear: '年',
+  unitMonth: '月',
+  unitDay: '日',
+  labelPostal: '邮政编码',
+  postalSearch: '查找地址',
+  postalNotFound: '未找到地址，请手动输入。',
 };
 
 export default zh;

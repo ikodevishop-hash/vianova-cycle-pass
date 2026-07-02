@@ -166,7 +166,7 @@ router.get('/rentals', (_req, res) => {
 
 // Admin creates a rental (貸出) for a member.
 router.post('/rentals', (req, res) => {
-  const { memberId, bikeId, storeId, name, birth, addr, tel } = req.body || {};
+  const { memberId, bikeId, storeId, name, birth, postalCode, addr, tel } = req.body || {};
   if (!db.prepare('SELECT 1 FROM users WHERE member_id=?').get(String(memberId || '')))
     return res.status(404).json({ error: 'MEMBER_NOT_FOUND' });
   const bike = db.prepare('SELECT * FROM bikes WHERE id=?').get(String(bikeId || ''));
@@ -179,12 +179,12 @@ router.post('/rentals', (req, res) => {
   const tx = db.transaction(() => {
     db.prepare(
       `INSERT INTO rentals (rental_id,member_id,bike_id,bike_name,spec_short,price_monthly,
-        customer_name,birthdate,address,phone,id_photo,started_at,bike_color,bike_security_no,
+        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,bike_color,bike_security_no,
         store_id,store_name,store_address,store_phone,store_hours,store_holiday)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).run(
       rentalId, String(memberId), bike.id, bike.name, bike.spec_short, bike.price_monthly,
-      String(name), String(birth || ''), String(addr || ''), String(tel || ''), '', new Date().toISOString(),
+      String(name), String(birth || ''), String(postalCode || ''), String(addr || ''), String(tel || ''), '', new Date().toISOString(),
       bike.color || '', bike.security_no || '',
       store ? store.id : '', store ? store.name : '', store ? store.address : '',
       store ? store.phone : '', store ? store.hours : '', store ? (store.holiday || '') : '',

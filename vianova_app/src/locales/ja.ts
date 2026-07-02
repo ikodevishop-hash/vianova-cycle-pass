@@ -181,6 +181,14 @@ const ja = {
   // bike color / anti-theft registration
   labelColor: 'カラー',
   labelSecurityNo: '防犯登録番号',
+
+  // birthdate (year/month/day) + postal code
+  unitYear: '年',
+  unitMonth: '月',
+  unitDay: '日',
+  labelPostal: '郵便番号',
+  postalSearch: '住所検索',
+  postalNotFound: '住所が見つかりませんでした。手入力してください。',
 };
 
 export type Dict = typeof ja;

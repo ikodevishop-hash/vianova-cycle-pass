@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { TopBar } from '../src/components/TopBar';
 import { Btn, Card, Field } from '../src/components/ui';
 import { useToast } from '../src/components/toast';
 import { findBike, getStores, setDraft, useDB } from '../src/store';
+import { lookupPostal } from '../src/postal';
 import { C, R } from '../src/theme';
 
 export default function Apply() {
@@ -21,12 +22,21 @@ export default function Apply() {
   const stores = getStores();
 
   const [name, setName] = useState('');
-  const [birth, setBirth] = useState('');
+  const [birthY, setBirthY] = useState('');
+  const [birthM, setBirthM] = useState('');
+  const [birthD, setBirthD] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const [addr, setAddr] = useState('');
   const [tel, setTel] = useState('');
   const [storeId, setStoreId] = useState('');
   const [idPhoto, setIdPhoto] = useState<string | null>(null);
   const [err, setErr] = useState('');
+
+  const doPostalLookup = async () => {
+    const found = await lookupPostal(postalCode);
+    if (found) setAddr(found);
+    else toast(t('postalNotFound'));
+  };
 
   const handleResult = (res: ImagePicker.ImagePickerResult) => {
     if (res.canceled || !res.assets?.length) return;
@@ -54,7 +64,8 @@ export default function Apply() {
 
   const submit = () => {
     setErr('');
-    if (!name.trim() || !birth.trim() || !addr.trim() || !tel.trim()) {
+    const y = birthY.trim(), m = birthM.trim(), d = birthD.trim();
+    if (!name.trim() || !y || !m || !d || !addr.trim() || !tel.trim()) {
       setErr(t('errAllFields'));
       return;
     }
@@ -67,9 +78,23 @@ export default function Apply() {
       return;
     }
     if (!bike) return;
-    setDraft({ bikeId: bike.id, storeId, name: name.trim(), birth: birth.trim(), addr: addr.trim(), tel: tel.trim(), idPhoto });
+    const birth = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    setDraft({ bikeId: bike.id, storeId, name: name.trim(), birth, postalCode: postalCode.trim(), addr: addr.trim(), tel: tel.trim(), idPhoto });
     router.push('/payment' as never);
   };
+
+  const birthInput = {
+    borderWidth: 1.5,
+    borderColor: C.line,
+    borderRadius: R.sm,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 13,
+    fontSize: 15,
+    color: C.text,
+    textAlign: 'center' as const,
+  };
+  const unitTx = { fontSize: 14, color: C.muted, fontWeight: '700' as const };
 
   return (
     <View style={{ flex: 1, backgroundColor: C.paper }}>
@@ -83,7 +108,34 @@ export default function Apply() {
             <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t('applySub')}</Text>
 
             <Field label={`${t('labelName')} *`} value={name} onChangeText={setName} placeholder={t('phName')} />
-            <Field label={`${t('labelBirth')} *`} value={birth} onChangeText={setBirth} placeholder="1990-01-01" />
+
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: C.ink, marginBottom: 6 }}>
+                {t('labelBirth')} *
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <TextInput value={birthY} onChangeText={setBirthY} keyboardType="number-pad" maxLength={4} placeholder="1990" placeholderTextColor="#9aa6a2" style={[birthInput, { flex: 1.5 }]} />
+                <Text style={unitTx}>{t('unitYear')}</Text>
+                <TextInput value={birthM} onChangeText={setBirthM} keyboardType="number-pad" maxLength={2} placeholder="1" placeholderTextColor="#9aa6a2" style={[birthInput, { flex: 1 }]} />
+                <Text style={unitTx}>{t('unitMonth')}</Text>
+                <TextInput value={birthD} onChangeText={setBirthD} keyboardType="number-pad" maxLength={2} placeholder="1" placeholderTextColor="#9aa6a2" style={[birthInput, { flex: 1 }]} />
+                <Text style={unitTx}>{t('unitDay')}</Text>
+              </View>
+            </View>
+
+            <Field
+              label={t('labelPostal')}
+              value={postalCode}
+              onChangeText={setPostalCode}
+              keyboardType="number-pad"
+              maxLength={8}
+              placeholder="5300001"
+              rightSlot={
+                <Pressable onPress={doPostalLookup} hitSlop={6} style={{ paddingHorizontal: 12, paddingVertical: 10 }}>
+                  <Text style={{ color: C.accentPress, fontWeight: '700', fontSize: 13 }}>{t('postalSearch')}</Text>
+                </Pressable>
+              }
+            />
             <Field label={`${t('labelAddr')} *`} value={addr} onChangeText={setAddr} placeholder={t('phAddr')} />
             <Field
               label={`${t('labelTel')} *`}

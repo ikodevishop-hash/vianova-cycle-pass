@@ -327,6 +327,9 @@
       <div><label>生年月日</label><input type="text" id="rent-birth" placeholder="1990-01-01"></div>
       <div><label>電話番号</label><input type="text" id="rent-tel" placeholder="090-1234-5678"></div>
     </div>
+    <div class="grid2" style="margin-top:0">
+      <div><label>郵便番号</label><input type="text" id="rent-postal" placeholder="5300001"></div>
+    </div>
     <label>住所</label><input type="text" id="rent-addr" placeholder="〇〇県〇〇市…">
     <div class="err" id="rent-err"></div>
     <div class="row-actions"><button class="btn btn-primary" id="rent-go">貸出する</button><button class="btn btn-ghost" id="rent-cancel">閉じる</button></div>
@@ -471,6 +474,7 @@ async function openCustomer(memberId){
         <div class="k">メール確認</div><div class="v">${u.emailVerified?'確認済':'未確認'}</div>
         <div class="k">レンタルID</div><div class="v mono">${rentals.map(r=>r.rentalId).join(' , ')||'—'}</div>
         <div class="k">生年月日</div><div class="v">${r0?r0.birthdate:'—'}</div>
+        <div class="k">郵便番号</div><div class="v">${r0&&r0.postalCode?r0.postalCode:'—'}</div>
         <div class="k">住所</div><div class="v">${r0?r0.address:'—'}</div>
         <div class="k">電話番号</div><div class="v">${r0?r0.phone:'—'}</div>
         <div class="k">レンタル中の自転車</div><div class="v">${rentals.filter(r=>!r.returnedAt).map(r=>r.bikeName).join(' , ')||'—'}</div>
@@ -511,7 +515,7 @@ async function openRentModal(memberId, name){
     ? avail.map(b=>`<option value="${b.id}">${b.name}（${b.color||'—'}）／¥${(b.priceMonthly||0).toLocaleString()}/月</option>`).join('')
     : '<option value="">（貸出可能な自転車がありません）</option>';
   $('rent-store').innerHTML = '<option value="">（受付店舗を選択）</option>' + stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-  $('rent-name').value=name||''; $('rent-birth').value=''; $('rent-addr').value=''; $('rent-tel').value=''; $('rent-err').textContent='';
+  $('rent-name').value=name||''; $('rent-birth').value=''; $('rent-postal').value=''; $('rent-addr').value=''; $('rent-tel').value=''; $('rent-err').textContent='';
   $('modal-rent').dataset.member=memberId;
   $('rent-to').textContent=`会員 ${memberId} に貸し出します`;
   $('modal-rent').classList.add('on');
@@ -521,7 +525,7 @@ $('rent-go').onclick=async()=>{
   const memberId=$('modal-rent').dataset.member;
   const err=$('rent-err'); err.textContent='';
   const body={ memberId, bikeId:$('rent-bike').value, storeId:$('rent-store').value,
-    name:$('rent-name').value.trim(), birth:$('rent-birth').value.trim(), addr:$('rent-addr').value.trim(), tel:$('rent-tel').value.trim() };
+    name:$('rent-name').value.trim(), birth:$('rent-birth').value.trim(), postalCode:$('rent-postal').value.trim(), addr:$('rent-addr').value.trim(), tel:$('rent-tel').value.trim() };
   if(!body.bikeId){ err.textContent='貸出できる自転車がありません。'; return; }
   if(!body.name){ err.textContent='お名前を入力してください。'; return; }
   try { await api('/api/admin/rentals',{method:'POST',body}); $('modal-rent').classList.remove('on'); toast('レンタルを登録しました'); openCustomer(memberId); }

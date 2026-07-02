@@ -167,6 +167,13 @@ const en: Dict = {
 
   labelColor: 'Color',
   labelSecurityNo: 'Anti-theft reg. no.',
+
+  unitYear: 'Y',
+  unitMonth: 'M',
+  unitDay: 'D',
+  labelPostal: 'Postal code',
+  postalSearch: 'Find address',
+  postalNotFound: 'Address not found. Please enter it manually.',
 };
 
 export default en;
