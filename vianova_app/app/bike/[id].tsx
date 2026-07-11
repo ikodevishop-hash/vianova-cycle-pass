@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { TopBar } from '../../src/components/TopBar';
-import { Btn, Card } from '../../src/components/ui';
+import { Btn, Card, Badge } from '../../src/components/ui';
 import { findBike, useDB } from '../../src/store';
 import { yen } from '../../src/format';
 import { C, R } from '../../src/theme';
@@ -54,7 +54,13 @@ export default function BikeDetail() {
           </View>
         )}
 
-        <Text style={{ fontSize: 20, fontWeight: '700', color: C.ink }}>{bike.name}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: C.ink }}>{bike.name}</Text>
+          <Badge
+            text={t(bike.productType === 'lease' ? 'productLease' : 'productRental')}
+            bg={bike.productType === 'lease' ? C.ink2 : C.accent}
+          />
+        </View>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, marginBottom: 12 }}>{bike.specShort}</Text>
 
         <Card>
@@ -62,7 +68,9 @@ export default function BikeDetail() {
             {yen(bike.priceMonthly)}
             <Text style={{ fontSize: 15, color: C.muted, fontWeight: '600' }}> {t('perMonthTax')}</Text>
           </Text>
-          <Text style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>{t('maintIncluded')}</Text>
+          <Text style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>
+            {t(bike.productType === 'lease' ? 'leaseNote' : 'maintIncluded')}
+          </Text>
         </Card>
 
         <Card style={{ marginTop: 14 }}>
@@ -72,7 +80,7 @@ export default function BikeDetail() {
         </Card>
 
         <Btn
-          title={t('btnApplyThis')}
+          title={t(bike.productType === 'lease' ? 'btnApplyLease' : 'btnApplyThis')}
           onPress={() => router.push(`/apply?bikeId=${bike.id}` as never)}
           style={{ marginTop: 16 }}
         />

@@ -64,8 +64,8 @@ const en: Dict = {
   homeHello: 'Hello, {{id}}',
   mBikesT: 'Available bikes',
   mBikesS: 'Browse bikes you can rent',
-  mCertT: 'Rental certificate',
-  mCertS: "Bikes you're renting now",
+  mCertT: 'Rental & lease certificate',
+  mCertS: 'Bikes you rent or lease now',
   mAmtT: "This month's charges",
   mAmtS: 'Your payment due this month',
   mNewsT: 'Announcements',
@@ -122,7 +122,7 @@ const en: Dict = {
   btnViewCert: 'View rental certificate',
   btnToHome: 'Back to home',
 
-  certTitle: 'Rental certificate',
+  certTitle: 'Rental & lease certificate',
   emptyCert: 'You have no active rentals.',
   certStart: 'Rental start date',
   certBikename: 'Bike name',
@@ -174,6 +174,15 @@ const en: Dict = {
   labelPostal: 'Postal code',
   postalSearch: 'Find address',
   postalNotFound: 'Address not found. Please enter it manually.',
+
+  mLeaseT: 'Available lease bikes',
+  mLeaseS: 'New bikes on a 2-year plan (insurance & maintenance incl.)',
+  leaseTitle: 'Available lease bikes',
+  emptyLease: 'No lease bikes are available right now.',
+  productRental: 'Rental',
+  productLease: 'Lease',
+  btnApplyLease: 'Apply to lease this bike',
+  leaseNote: 'New bike · 2-year plan / insurance renewal & maintenance included',
 };
 
 export default en;

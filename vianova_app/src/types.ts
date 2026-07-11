@@ -29,6 +29,8 @@ export interface Bike {
   securityNo: string;
   /** Whether this unit is currently rented out. */
   rented: boolean;
+  /** 'rental' (レンタル) or 'lease' (リース＝新車2年契約). */
+  productType: 'rental' | 'lease';
   /** Free-form operator note. */
   note: string;
   /** Data-URI / remote photo URLs (max 4). */
@@ -74,6 +76,8 @@ export interface Rental {
   idPhoto: string;
   /** ISO timestamp of when the rental started. */
   startedAt: string;
+  /** 'rental' or 'lease' — snapshot of the product type at contract time. */
+  productType: 'rental' | 'lease';
   /** Snapshot of the rented bike's color and anti-theft registration number. */
   bikeColor: string;
   bikeSecurityNo: string;

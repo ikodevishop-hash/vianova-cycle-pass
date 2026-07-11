@@ -136,13 +136,13 @@ router.post('/rentals', authUser, (req, res) => {
   const tx = db.transaction(() => {
     db.prepare(
       `INSERT INTO rentals (rental_id,member_id,bike_id,bike_name,spec_short,price_monthly,
-        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,
+        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,product_type,
         bike_color,bike_security_no,
         store_id,store_name,store_address,store_phone,store_hours,store_holiday)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).run(
       rentalId, req.memberId, bike.id, bike.name, bike.spec_short, bike.price_monthly,
-      String(name), String(birth), String(postalCode || ''), String(addr), String(tel), String(idPhoto), new Date().toISOString(),
+      String(name), String(birth), String(postalCode || ''), String(addr), String(tel), String(idPhoto), new Date().toISOString(), bike.product_type || 'rental',
       bike.color || '', bike.security_no || '',
       store ? store.id : '', store ? store.name : '', store ? store.address : '',
       store ? store.phone : '', store ? store.hours : '', store ? (store.holiday || '') : '',

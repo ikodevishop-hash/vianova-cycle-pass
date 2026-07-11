@@ -24,6 +24,7 @@ db.exec(`
     name TEXT, emoji TEXT, spec_short TEXT, spec_long TEXT,
     price_monthly INTEGER, frame_no TEXT, insurance TEXT,
     color TEXT, security_no TEXT, rented INTEGER DEFAULT 0,
+    product_type TEXT DEFAULT 'rental',
     stock INTEGER, note TEXT, photos TEXT
   );
   CREATE TABLE IF NOT EXISTS rentals (
@@ -60,12 +61,15 @@ for (const col of ['store_id', 'store_name', 'store_address', 'store_phone', 'st
 ensureColumn('bikes', 'color', 'TEXT');
 ensureColumn('bikes', 'security_no', 'TEXT');
 ensureColumn('bikes', 'rented', 'INTEGER DEFAULT 0');
+// Product type: 'rental' | 'lease'（リース＝新車2年契約）.
+ensureColumn('bikes', 'product_type', "TEXT DEFAULT 'rental'");
+ensureColumn('rentals', 'product_type', "TEXT DEFAULT 'rental'");
 
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {
   const ins = db.prepare(`INSERT INTO bikes
-    (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,note,photos)
-    VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,@rented,@note,@photos)`);
+    (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,product_type,note,photos)
+    VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,@rented,@product_type,@note,@photos)`);
   for (const b of SEED_BIKES) ins.run(b);
 });
 if (db.prepare('SELECT COUNT(*) c FROM bikes').get().c === 0) seedBikes();

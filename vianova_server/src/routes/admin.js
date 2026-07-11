@@ -68,6 +68,7 @@ function bikeParams(body) {
     insurance: String(body.insurance || '').trim(),
     color: String(body.color || '').trim(),
     security_no: String(body.securityNo || '').trim(),
+    product_type: body.productType === 'lease' ? 'lease' : 'rental',
     note: String(body.note || '').trim(),
     photos: JSON.stringify(Array.isArray(body.photos) ? body.photos.slice(0, 4) : []),
   };
@@ -78,8 +79,8 @@ router.post('/bikes', (req, res) => {
   if (!p.name || !p.spec_short || !p.price_monthly) return res.status(400).json({ error: 'INVALID_FIELDS' });
   const id = 'BK' + Date.now();
   db.prepare(
-    `INSERT INTO bikes (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,note,photos)
-     VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,0,@note,@photos)`,
+    `INSERT INTO bikes (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,product_type,note,photos)
+     VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,0,@product_type,@note,@photos)`,
   ).run({ id, ...p });
   res.json({ bike: mapBike(db.prepare('SELECT * FROM bikes WHERE id=?').get(id)) });
 });
@@ -91,7 +92,7 @@ router.put('/bikes/:id', (req, res) => {
   if (!p.name || !p.spec_short || !p.price_monthly) return res.status(400).json({ error: 'INVALID_FIELDS' });
   db.prepare(
     `UPDATE bikes SET name=@name,emoji=@emoji,spec_short=@spec_short,spec_long=@spec_long,
-      price_monthly=@price_monthly,frame_no=@frame_no,insurance=@insurance,color=@color,security_no=@security_no,note=@note,photos=@photos
+      price_monthly=@price_monthly,frame_no=@frame_no,insurance=@insurance,color=@color,security_no=@security_no,product_type=@product_type,note=@note,photos=@photos
      WHERE id=@id`,
   ).run({ id: req.params.id, ...p });
   res.json({ bike: mapBike(db.prepare('SELECT * FROM bikes WHERE id=?').get(req.params.id)) });
@@ -179,12 +180,12 @@ router.post('/rentals', (req, res) => {
   const tx = db.transaction(() => {
     db.prepare(
       `INSERT INTO rentals (rental_id,member_id,bike_id,bike_name,spec_short,price_monthly,
-        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,bike_color,bike_security_no,
+        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,product_type,bike_color,bike_security_no,
         store_id,store_name,store_address,store_phone,store_hours,store_holiday)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).run(
       rentalId, String(memberId), bike.id, bike.name, bike.spec_short, bike.price_monthly,
-      String(name), String(birth || ''), String(postalCode || ''), String(addr || ''), String(tel || ''), '', new Date().toISOString(),
+      String(name), String(birth || ''), String(postalCode || ''), String(addr || ''), String(tel || ''), '', new Date().toISOString(), bike.product_type || 'rental',
       bike.color || '', bike.security_no || '',
       store ? store.id : '', store ? store.name : '', store ? store.address : '',
       store ? store.phone : '', store ? store.hours : '', store ? (store.holiday || '') : '',

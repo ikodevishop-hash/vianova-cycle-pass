@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { TopBar } from '../src/components/TopBar';
 import { Badge } from '../src/components/ui';
@@ -14,17 +14,19 @@ export default function Bikes() {
   const { t } = useTranslation();
   const router = useRouter();
   const toast = useToast();
+  const { type } = useLocalSearchParams<{ type?: string }>();
+  const isLease = type === 'lease';
   useDB();
 
-  const bikes = getBikes();
+  const bikes = getBikes().filter((b) => b.productType === (isLease ? 'lease' : 'rental'));
   const rentedIds = myRentals().map((r) => r.bikeId);
 
   return (
     <View style={{ flex: 1, backgroundColor: C.paper }}>
-      <TopBar title={t('bikesTitle')} />
+      <TopBar title={isLease ? t('leaseTitle') : t('bikesTitle')} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {bikes.length === 0 ? (
-          <Empty icon="🚲" text={t('emptyBikes')} />
+          <Empty icon={isLease ? '✨' : '🚲'} text={t(isLease ? 'emptyLease' : 'emptyBikes')} />
         ) : (
           bikes.map((b) => {
             const renting = rentedIds.includes(b.id);

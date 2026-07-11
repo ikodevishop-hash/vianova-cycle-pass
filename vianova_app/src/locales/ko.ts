@@ -64,8 +64,8 @@ const ko: Dict = {
   homeHello: '{{id}}님, 안녕하세요',
   mBikesT: '렌탈 자전거 목록',
   mBikesS: '빌릴 수 있는 자전거 보기',
-  mCertT: '렌탈 중 증명서',
-  mCertS: '현재 빌린 자전거',
+  mCertT: '렌탈 & 리스 중 증명서',
+  mCertS: '렌탈·리스 중인 자전거',
   mAmtT: '이번 달 이용 금액',
   mAmtS: '이번 달 결제 예정',
   mNewsT: '매장 공지',
@@ -122,7 +122,7 @@ const ko: Dict = {
   btnViewCert: '렌탈 증명서 보기',
   btnToHome: '홈으로 돌아가기',
 
-  certTitle: '렌탈 중 증명서',
+  certTitle: '렌탈 & 리스 중 증명서',
   emptyCert: '현재 렌탈 중인 자전거가 없습니다.',
   certStart: '렌탈 시작일',
   certBikename: '자전거 이름',
@@ -174,6 +174,15 @@ const ko: Dict = {
   labelPostal: '우편번호',
   postalSearch: '주소 찾기',
   postalNotFound: '주소를 찾을 수 없습니다. 직접 입력해 주세요.',
+
+  mLeaseT: '리스 자전거 목록',
+  mLeaseS: '새 자전거를 2년 계약으로 (보험 갱신·정비 포함)',
+  leaseTitle: '리스 자전거 목록',
+  emptyLease: '현재 이용 가능한 리스 자전거가 없습니다.',
+  productRental: '렌탈',
+  productLease: '리스',
+  btnApplyLease: '이 자전거 리스 신청',
+  leaseNote: '새 자전거·2년 계약 / 보험 갱신·정비 포함',
 };
 
 export default ko;

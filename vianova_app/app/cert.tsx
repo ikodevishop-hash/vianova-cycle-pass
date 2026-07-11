@@ -25,7 +25,10 @@ export default function Cert() {
           list.map((r) => (
             <Card key={r.rentalId} style={{ marginBottom: 14 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                <Badge text={t('badgeRenting')} bg={C.accent} />
+                <Badge
+                  text={t(r.productType === 'lease' ? 'productLease' : 'productRental')}
+                  bg={r.productType === 'lease' ? C.ink2 : C.accent}
+                />
                 <Text style={{ fontWeight: '700', letterSpacing: 1, color: C.ink }}>{r.rentalId}</Text>
               </View>
               <Text style={{ fontSize: 18, fontWeight: '700', color: C.ink, marginVertical: 4 }}>{r.bikeName}</Text>

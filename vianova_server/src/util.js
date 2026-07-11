@@ -6,13 +6,14 @@ const mapBike = (r) => ({
   id: r.id, name: r.name, emoji: r.emoji, specShort: r.spec_short, specLong: r.spec_long,
   priceMonthly: r.price_monthly, frameNo: r.frame_no, insurance: r.insurance,
   color: r.color || '', securityNo: r.security_no || '', rented: !!r.rented,
+  productType: r.product_type || 'rental',
   note: r.note, photos: JSON.parse(r.photos || '[]'),
 });
 const mapRental = (r) => ({
   rentalId: r.rental_id, memberId: r.member_id, bikeId: r.bike_id, bikeName: r.bike_name,
   specShort: r.spec_short, priceMonthly: r.price_monthly, customerName: r.customer_name,
   birthdate: r.birthdate, postalCode: r.postal_code || '', address: r.address, phone: r.phone, idPhoto: r.id_photo, startedAt: r.started_at,
-  returnedAt: r.returned_at || '',
+  returnedAt: r.returned_at || '', productType: r.product_type || 'rental',
   bikeColor: r.bike_color || '', bikeSecurityNo: r.bike_security_no || '',
   storeId: r.store_id || '', storeName: r.store_name || '', storeAddress: r.store_address || '',
   storePhone: r.store_phone || '', storeHours: r.store_hours || '', storeHoliday: r.store_holiday || '',
