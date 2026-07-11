@@ -96,4 +96,11 @@ if (!db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_ha
   );
 }
 
+// Demo user for the app — always available (email pre-verified so no confirmation needed).
+if (!db.prepare('SELECT 1 FROM users WHERE member_id=?').get('demo')) {
+  db.prepare(
+    'INSERT INTO users (member_id,email,password_hash,email_verified,created_at) VALUES (?,?,?,1,?)',
+  ).run('demo', 'demo@vianova.example', bcrypt.hashSync('Demo2026', 10), new Date().toISOString());
+}
+
 module.exports = db;
