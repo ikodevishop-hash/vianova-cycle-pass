@@ -63,7 +63,7 @@ const zh: Dict = {
   homeHello: '{{id}}，您好',
   mBikesT: '可租自行车一览',
   mBikesS: '查看可租自行车',
-  mCertT: '租借与租赁中证明',
+  mCertT: '使用证明书',
   mCertS: '当前租借或租赁的自行车',
   mAmtT: '本月费用',
   mAmtS: '本月应付款',
@@ -120,7 +120,7 @@ const zh: Dict = {
   btnViewCert: '查看租借证明',
   btnToHome: '返回首页',
 
-  certTitle: '租借与租赁中证明',
+  certTitle: '使用证明书',
   emptyCert: '目前没有租借中的自行车。',
   certStart: '租借开始日',
   certBikename: '自行车名称',
@@ -173,13 +173,13 @@ const zh: Dict = {
   postalNotFound: '未找到地址，请手动输入。',
 
   mLeaseT: '租赁自行车一览',
-  mLeaseS: '新车2年合约（含保险更新与保养）',
+  mLeaseS: '新车可2年合约乘坐的计划（含保险更新与保养）',
   leaseTitle: '租赁自行车一览',
   emptyLease: '目前没有可租赁的自行车。',
   productRental: '租借',
   productLease: '租赁',
   btnApplyLease: '申请租赁此车',
-  leaseNote: '新车・2年合约 / 含保险更新与保养',
+  leaseNote: '新车可2年合约乘坐的计划（含保险更新与保养）',
 };
 
 export default zh;

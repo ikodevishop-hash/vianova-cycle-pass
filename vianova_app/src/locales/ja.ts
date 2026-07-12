@@ -68,7 +68,7 @@ const ja = {
   homeHello: '{{id}} さん、こんにちは',
   mBikesT: 'レンタル自転車一覧',
   mBikesS: '借りられる自転車を見る',
-  mCertT: 'レンタル＆リース中自転車証明書',
+  mCertT: 'ご利用証明書',
   mCertS: 'レンタル中・リース中の自転車',
   mAmtT: '今月の利用金額',
   mAmtS: '今月のお支払い予定',
@@ -131,7 +131,7 @@ const ja = {
   btnToHome: 'ホームに戻る',
 
   // certificate
-  certTitle: 'レンタル＆リース中自転車証明書',
+  certTitle: 'ご利用証明書',
   emptyCert: '現在レンタル中の自転車はありません。',
   certStart: 'レンタル開始日',
   certBikename: '自転車名',
@@ -192,13 +192,13 @@ const ja = {
 
   // lease service
   mLeaseT: 'リース自転車一覧',
-  mLeaseS: '新車を2年契約で（保険更新・メンテ込み）',
+  mLeaseS: '新車が2年契約で乗れるプラン（保険更新・メンテ付き）',
   leaseTitle: 'リース自転車一覧',
   emptyLease: '現在ご利用いただけるリース自転車がありません。',
   productRental: 'レンタル',
   productLease: 'リース',
   btnApplyLease: 'この自転車をリース申込',
-  leaseNote: '新車・2年契約 / 保険更新・メンテナンス込み',
+  leaseNote: '新車が2年契約で乗れるプラン（保険更新・メンテ付き）',
 };
 
 export type Dict = typeof ja;
