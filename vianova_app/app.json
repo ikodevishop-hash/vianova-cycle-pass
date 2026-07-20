@@ -2,12 +2,16 @@
   "expo": {
     "name": "Vianova Cycle Pass",
     "slug": "vianova-cycle-pass",
+    "owner": "ikodevis-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "vianovacyclepass",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "primaryColor": "#15B981",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vianova.cyclepass",
@@ -25,7 +29,11 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.READ_MEDIA_IMAGES"
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -44,7 +52,14 @@
     ],
     "extra": {
       "appKind": "user",
-      "apiUrl": "https://vianova-demo.onrender.com"
+      "apiUrl": "https://vianova-demo.onrender.com",
+      "router": {},
+      "eas": {
+        "projectId": "ac9ae553-6308-4b08-8486-259768851ca3"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ac9ae553-6308-4b08-8486-259768851ca3"
     }
   }
 }
