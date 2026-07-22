@@ -12,6 +12,8 @@ app.set('trust proxy', true);
 app.use(cors());
 // ID-document photos arrive as base64 data URIs, so allow a generous body size.
 app.use(express.json({ limit: '12mb' }));
+// GMO result notifications (結果通知) arrive as application/x-www-form-urlencoded.
+app.use(express.urlencoded({ extended: false }));
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'vianova-cycle-pass', mail: mailMode() }));
 

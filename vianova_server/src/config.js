@@ -30,4 +30,25 @@ module.exports = {
     pass: process.env.SMTP_PASS || '',
     from: process.env.SMTP_FROM || 'Vianova Cycle Pass <no-reply@vianova.example>',
   },
+  // GMO PG マルチペイメント — リンクタイプPlus (hosted card payment).
+  //  - When GMO_SHOP_ID + GMO_SHOP_PASS are set, real GMO payment is used:
+  //    the server asks GMO for a hosted payment URL, the customer enters the
+  //    card ONLY on GMO's page, and GMO notifies us of the result.
+  //  - Otherwise the app falls back to the built-in mock (demo works with no
+  //    GMO account). The card number never touches this server.
+  gmo: {
+    shopId: process.env.GMO_SHOP_ID || '',
+    shopPass: process.env.GMO_SHOP_PASS || '',
+    // 設定ID (16-char) created in the GMO console — defines the payment screen
+    // design and (recommended) the result-notification URL. Optional.
+    configId: process.env.GMO_CONFIG_ID || '',
+    // API host. Test: pt01.mul-pay.jp / Production: p01.mul-pay.jp.
+    // GMO_PROD=true switches to production; GMO_API_HOST overrides entirely.
+    apiHost:
+      process.env.GMO_API_HOST ||
+      (process.env.GMO_PROD === 'true' ? 'p01.mul-pay.jp' : 'pt01.mul-pay.jp'),
+    // AUTH (仮売上) or CAPTURE (即時売上). Monthly fee is charged immediately.
+    jobCd: (process.env.GMO_JOBCD || 'CAPTURE').toUpperCase(),
+    prod: process.env.GMO_PROD === 'true',
+  },
 };

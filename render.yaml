@@ -33,6 +33,20 @@ services:
       # 未設定ならモック（確認リンクはAPIレスポンス/ログに出る）。
       - key: MAIL_MODE
         value: ""
+      # ── GMO 決済（リンクタイプPlus）──────────────────────────
+      # 値を入れると本物のGMO決済に切替（未設定ならモックのまま）。
+      # ShopID/ShopPass はダッシュボードで設定（コードには絶対に書かない）。
+      # テスト環境は host=pt01（既定）。本番契約時のみ GMO_PROD=true。
+      - key: GMO_SHOP_ID
+        sync: false
+      - key: GMO_SHOP_PASS
+        sync: false
+      - key: GMO_CONFIG_ID
+        sync: false
+      - key: GMO_JOBCD
+        value: CAPTURE
+      - key: GMO_PROD
+        value: "false"
       # PORT は Render が自動注入。PUBLIC_URL は未設定でOK（実ホストから導出）。
 #
 # 注意（無料枠）:

@@ -136,6 +136,39 @@ export async function createRental(d: RentalDraft): Promise<Rental> {
   return r.rental;
 }
 
+/**
+ * Start payment for an application.
+ *  - mock (no GMO configured) → server returns the finished rental immediately.
+ *  - real GMO → server returns a hosted GMO URL (linkUrl) + orderId. The app
+ *    opens linkUrl; the card is entered only on GMO's page.
+ */
+export interface PaymentStart {
+  mock?: boolean;
+  rental?: Rental;
+  orderId?: string;
+  linkUrl?: string;
+  amount?: number;
+}
+export function startPayment(d: RentalDraft): Promise<PaymentStart> {
+  return api<PaymentStart>('/api/payments/start', {
+    method: 'POST',
+    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, postalCode: d.postalCode, addr: d.addr, tel: d.tel, idPhoto: d.idPhoto },
+  });
+}
+export function getPaymentStatus(orderId: string) {
+  return api<{ paymentStatus: string; rentalId: string }>(
+    `/api/payments/${encodeURIComponent(orderId)}/status`,
+  );
+}
+export function cancelPayment(orderId: string) {
+  return api<{ ok: true }>(`/api/payments/${encodeURIComponent(orderId)}/cancel`, { method: 'POST' });
+}
+/** Refresh bikes + rentals after a payment resolves. */
+export async function refreshAfterPayment(): Promise<void> {
+  await Promise.allSettled([loadBikes(), loadRentals()]);
+  emit();
+}
+
 /* ---------- rental application draft (transient) ---------- */
 export const setDraft = (d: RentalDraft | null) => {
   draft = d;

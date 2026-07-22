@@ -114,6 +114,15 @@ const zh: Dict = {
   gmoNote: '※ 此为演示版，不会实际扣款。正式版将跳转至GMO安全页面。',
   toastCard: '请输入卡片信息',
 
+  // payment (GMO Link Type Plus — hosted)
+  paySummaryH: '付款内容',
+  payProceed: '前往付款',
+  paySecureNote: '※ 卡片信息在GMO的安全付款页面输入，本应用及本公司服务器均不会保存。',
+  payOpened: '已打开GMO付款页面。完成手续后，请返回本应用。',
+  payCheckStatus: '查询付款状态',
+  payChecking: '正在确认…',
+  payIncomplete: '付款尚未完成。请在付款页面完成手续。',
+
   successTitle: '申请完成',
   successH: '租借已确认',
   successSub: '您的租借ID如下。',

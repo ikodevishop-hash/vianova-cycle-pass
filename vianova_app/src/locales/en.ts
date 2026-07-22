@@ -116,6 +116,16 @@ const en: Dict = {
     '* Demo only. No real payment is processed. The live version uses GMO’s secure screen.',
   toastCard: 'Please enter card details',
 
+  // payment (GMO Link Type Plus — hosted)
+  paySummaryH: 'Payment summary',
+  payProceed: 'Proceed to payment',
+  paySecureNote:
+    '* Card details are entered on GMO’s secure payment page. They are never stored by this app or our server.',
+  payOpened: 'The GMO payment page has opened. Once you finish, return to this app.',
+  payCheckStatus: 'Check payment status',
+  payChecking: 'Checking…',
+  payIncomplete: 'Payment is not complete yet. Please finish on the payment page.',
+
   successTitle: 'Application complete',
   successH: 'Your rental is confirmed',
   successSub: 'Your rental ID is shown below.',

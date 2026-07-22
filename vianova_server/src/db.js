@@ -64,6 +64,11 @@ ensureColumn('bikes', 'rented', 'INTEGER DEFAULT 0');
 // Product type: 'rental' | 'lease'（リース＝新車2年契約）.
 ensureColumn('bikes', 'product_type', "TEXT DEFAULT 'rental'");
 ensureColumn('rentals', 'product_type', "TEXT DEFAULT 'rental'");
+// GMO payment: order_id (GMO OrderID), payment_status ('pending'|'paid'|'failed';
+// NULL on legacy/admin rows = treated as paid), amount charged.
+ensureColumn('rentals', 'order_id', 'TEXT');
+ensureColumn('rentals', 'payment_status', 'TEXT');
+ensureColumn('rentals', 'amount', 'INTEGER');
 
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {

@@ -116,6 +116,16 @@ const ko: Dict = {
     '※ 데모 버전입니다. 실제 결제는 이루어지지 않습니다. 실제 버전에서는 GMO 보안 화면으로 이동합니다.',
   toastCard: '카드 정보를 입력하세요',
 
+  // payment (GMO Link Type Plus — hosted)
+  paySummaryH: '결제 내용',
+  payProceed: '결제로 진행',
+  paySecureNote:
+    '※ 카드 정보는 GMO의 보안 결제 페이지에서 입력합니다. 본 앱·당사 서버에는 저장되지 않습니다.',
+  payOpened: 'GMO 결제 페이지를 열었습니다. 결제를 마치면 이 앱으로 돌아와 주세요.',
+  payCheckStatus: '결제 상태 확인',
+  payChecking: '확인 중…',
+  payIncomplete: '아직 결제가 완료되지 않았습니다. 결제 페이지에서 절차를 완료해 주세요.',
+
   successTitle: '신청 완료',
   successH: '렌탈이 확정되었습니다',
   successSub: '고객님의 렌탈 ID는 다음과 같습니다.',

@@ -14,6 +14,7 @@ const mapRental = (r) => ({
   specShort: r.spec_short, priceMonthly: r.price_monthly, customerName: r.customer_name,
   birthdate: r.birthdate, postalCode: r.postal_code || '', address: r.address, phone: r.phone, idPhoto: r.id_photo, startedAt: r.started_at,
   returnedAt: r.returned_at || '', productType: r.product_type || 'rental',
+  orderId: r.order_id || '', paymentStatus: r.payment_status || 'paid',
   bikeColor: r.bike_color || '', bikeSecurityNo: r.bike_security_no || '',
   storeId: r.store_id || '', storeName: r.store_name || '', storeAddress: r.store_address || '',
   storePhone: r.store_phone || '', storeHours: r.store_hours || '', storeHoliday: r.store_holiday || '',
@@ -36,4 +37,10 @@ function genRentalId() {
   return exists ? genRentalId() : s;
 }
 
-module.exports = { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId };
+/** GMO OrderID: unique, ≤27 chars, alphanumeric. Prefix + rentalId + time. */
+function genOrderId(rentalId) {
+  const t = Date.now().toString(36).toUpperCase();
+  return `V${rentalId}${t}`.slice(0, 27);
+}
+
+module.exports = { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId, genOrderId };

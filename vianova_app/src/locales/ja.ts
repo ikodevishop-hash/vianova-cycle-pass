@@ -123,6 +123,16 @@ const ja = {
     '※ デモ版です。実際の決済は行われません。本番ではGMOの安全な画面に遷移します。',
   toastCard: 'カード情報をご入力ください',
 
+  // payment (GMO Link Type Plus — hosted)
+  paySummaryH: 'お支払い内容',
+  payProceed: 'お支払いへ進む',
+  paySecureNote:
+    '※ カード情報はGMOの安全な決済ページで入力します。当アプリ・当社サーバーには保存されません。',
+  payOpened: 'GMOの決済ページを開きました。お手続きが完了したら、このアプリに戻ってください。',
+  payCheckStatus: '支払い状況を確認する',
+  payChecking: '確認しています…',
+  payIncomplete: 'まだ決済が完了していません。決済ページでお手続きを完了してください。',
+
   // success
   successTitle: 'お申込み完了',
   successH: 'レンタルが確定しました',
