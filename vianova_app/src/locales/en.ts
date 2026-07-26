@@ -205,6 +205,10 @@ const en: Dict = {
   withdrawConfirm: 'Really delete your account? This cannot be undone.',
   withdrawDone: 'Your account has been deleted',
   errActiveRental: 'You still have an active rental or lease. Please return the bike first.',
+
+  // legal links
+  legalTokushoho: 'Legal notice (Specified Commercial Transactions Act)',
+  legalPrivacy: 'Privacy policy',
 };
 
 export default en;

@@ -200,6 +200,10 @@ const zh: Dict = {
   withdrawConfirm: '确定要注销账户吗？此操作无法撤销。',
   withdrawDone: '账户已注销',
   errActiveRental: '您仍有租借或租赁中的自行车，请先归还后再办理。',
+
+  // legal links
+  legalTokushoho: '基于特定商业交易法的标示',
+  legalPrivacy: '隐私政策',
 };
 
 export default zh;

@@ -205,6 +205,10 @@ const ko: Dict = {
   withdrawConfirm: '정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
   withdrawDone: '탈퇴가 완료되었습니다',
   errActiveRental: '렌탈·리스 중인 자전거가 있어 탈퇴할 수 없습니다. 반납 후 진행해 주세요.',
+
+  // legal links
+  legalTokushoho: '특정상거래법에 따른 표기',
+  legalPrivacy: '개인정보 처리방침',
 };
 
 export default ko;

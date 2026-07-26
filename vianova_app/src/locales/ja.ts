@@ -221,6 +221,10 @@ const ja = {
   withdrawConfirm: '本当に退会しますか？この操作は取り消せません。',
   withdrawDone: '退会が完了しました',
   errActiveRental: 'レンタル・リース中のため退会できません。ご返却後にお手続きください。',
+
+  // legal links
+  legalTokushoho: '特定商取引法に基づく表記',
+  legalPrivacy: 'プライバシーポリシー',
 };
 
 export type Dict = typeof ja;

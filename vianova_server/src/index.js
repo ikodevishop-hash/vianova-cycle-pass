@@ -19,6 +19,8 @@ app.get('/health', (_req, res) => res.json({ ok: true, service: 'vianova-cycle-p
 
 app.use('/api', require('./routes/user'));
 app.use('/api/admin', require('./routes/admin'));
+// Legal pages (特商法表記 / プライバシーポリシー) — linked from the app & stores.
+app.use('/legal', require('./legal'));
 
 // Serve the web admin at /admin (single-service deploy). Defaults to the sibling
 // `vianova_admin/` folder; Docker/Render can override with ADMIN_DIR.
