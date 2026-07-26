@@ -97,12 +97,23 @@ const seedStores = db.transaction(() => {
 });
 if (db.prepare('SELECT COUNT(*) c FROM stores').get().c === 0) seedStores();
 
-// Admin password (hashed) — seeded once.
-if (!db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_hash')) {
-  db.prepare('INSERT INTO settings (key,value) VALUES (?,?)').run(
-    'admin_password_hash',
-    bcrypt.hashSync(config.adminPassword, 10),
-  );
+// Admin password (hashed) — seeded once; when the ADMIN_PASSWORD env var is
+// explicitly set, it is the source of truth and overrides the stored hash on
+// boot (so operators can rotate the password from the host's env settings).
+{
+  const row = db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_hash');
+  if (!row) {
+    db.prepare('INSERT INTO settings (key,value) VALUES (?,?)').run(
+      'admin_password_hash',
+      bcrypt.hashSync(config.adminPassword, 10),
+    );
+  } else if (process.env.ADMIN_PASSWORD && !bcrypt.compareSync(process.env.ADMIN_PASSWORD, row.value)) {
+    db.prepare('UPDATE settings SET value=? WHERE key=?').run(
+      bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10),
+      'admin_password_hash',
+    );
+    console.log('[admin] password updated from ADMIN_PASSWORD env');
+  }
 }
 
 // Demo user for the app — always available (email pre-verified so no confirmation needed).

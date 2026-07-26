@@ -82,13 +82,15 @@ async function createPaymentUrl(p) {
   if (p.retUrl) payload.transaction.RetUrl = p.retUrl;
 
   const res = await postJson(G.apiHost, '/payment/GetLinkplusUrlPayment.json', payload);
+  // GMO returns either an object or a single-element array, with mixed casing.
+  const body = Array.isArray(res.json) ? res.json[0] || {} : res.json || {};
   // Success shape: { LinkUrl: "https://stg.link.mul-pay.jp/v2/plus/.../checkout/<key>" }
-  const linkUrl = res.json && (res.json.LinkUrl || res.json.linkUrl);
+  const linkUrl = body.LinkUrl || body.linkUrl;
   if (linkUrl) return { ok: true, linkUrl };
 
-  // Error shape: { ErrCode, ErrInfo } (or a list). Surface it for logging/tuning.
-  const errCode = res.json && (res.json.ErrCode || res.json.errCode);
-  const errInfo = res.json && (res.json.ErrInfo || res.json.errInfo);
+  // Error shape: [{ errCode, errInfo }] — surface it for logging/tuning.
+  const errCode = body.ErrCode || body.errCode;
+  const errInfo = body.ErrInfo || body.errInfo;
   console.error('[GMO] createPaymentUrl failed', res.status, res.raw);
   return { ok: false, errCode: errCode || `HTTP_${res.status}`, errInfo: errInfo || '', raw: res.raw };
 }
