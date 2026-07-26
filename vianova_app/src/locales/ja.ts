@@ -209,6 +209,18 @@ const ja = {
   productLease: 'リース',
   btnApplyLease: 'この自転車をリース申込',
   leaseNote: '新車が2年契約で乗れるプラン（保険更新・メンテ付き）',
+
+  // account (member info / deletion)
+  mAccountT: 'アカウント',
+  mAccountS: '会員情報・退会',
+  accountTitle: 'アカウント',
+  withdrawH: '退会（アカウント削除）',
+  withdrawNote:
+    '退会するとこのアカウントではログインできなくなります。返却済みのご利用記録は、法令・経理上の理由により一定期間保存されます。',
+  btnWithdraw: '退会する',
+  withdrawConfirm: '本当に退会しますか？この操作は取り消せません。',
+  withdrawDone: '退会が完了しました',
+  errActiveRental: 'レンタル・リース中のため退会できません。ご返却後にお手続きください。',
 };
 
 export type Dict = typeof ja;

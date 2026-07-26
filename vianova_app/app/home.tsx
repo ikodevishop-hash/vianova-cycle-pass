@@ -8,7 +8,7 @@ import { LangSwitch } from '../src/components/LangSwitch';
 import { currentUser, logout, reload, useDB } from '../src/store';
 import { C, R, shadow } from '../src/theme';
 
-type MenuKey = 'bikes' | 'lease' | 'cert' | 'amount' | 'news' | 'terms';
+type MenuKey = 'bikes' | 'lease' | 'cert' | 'amount' | 'news' | 'terms' | 'account';
 const MENU: { key: MenuKey; href: string; icon: string; tKey: string; sKey: string }[] = [
   { key: 'bikes', href: '/bikes', icon: '🚲', tKey: 'mBikesT', sKey: 'mBikesS' },
   { key: 'lease', href: '/bikes?type=lease', icon: '✨', tKey: 'mLeaseT', sKey: 'mLeaseS' },
@@ -16,6 +16,7 @@ const MENU: { key: MenuKey; href: string; icon: string; tKey: string; sKey: stri
   { key: 'amount', href: '/amount', icon: '💴', tKey: 'mAmtT', sKey: 'mAmtS' },
   { key: 'news', href: '/news', icon: '📣', tKey: 'mNewsT', sKey: 'mNewsS' },
   { key: 'terms', href: '/terms', icon: '📑', tKey: 'mTermsT', sKey: 'mTermsS' },
+  { key: 'account', href: '/account', icon: '👤', tKey: 'mAccountT', sKey: 'mAccountS' },
 ];
 
 export default function Home() {

@@ -193,6 +193,18 @@ const ko: Dict = {
   productLease: '리스',
   btnApplyLease: '이 자전거 리스 신청',
   leaseNote: '새 자전거를 2년 계약으로 이용하는 플랜 (보험 갱신·정비 포함)',
+
+  // account (member info / deletion)
+  mAccountT: '계정',
+  mAccountS: '회원 정보·탈퇴',
+  accountTitle: '계정',
+  withdrawH: '탈퇴 (계정 삭제)',
+  withdrawNote:
+    '탈퇴하면 이 계정으로 로그인할 수 없습니다. 반납 완료된 이용 기록은 법령·회계상의 이유로 일정 기간 보관됩니다.',
+  btnWithdraw: '탈퇴하기',
+  withdrawConfirm: '정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+  withdrawDone: '탈퇴가 완료되었습니다',
+  errActiveRental: '렌탈·리스 중인 자전거가 있어 탈퇴할 수 없습니다. 반납 후 진행해 주세요.',
 };
 
 export default ko;

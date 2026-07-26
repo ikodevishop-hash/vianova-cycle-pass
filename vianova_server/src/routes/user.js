@@ -92,6 +92,22 @@ router.get('/me', authUser, (req, res) => {
   res.json({ user: publicUser(u) });
 });
 
+// Account deletion (退会) — store-review requirement. Refused while a rental or
+// lease is active; completed rental records are retained for bookkeeping/legal
+// purposes (stated in the privacy policy), only the login account is removed.
+router.delete('/me', authUser, (req, res) => {
+  const active = db
+    .prepare(
+      `SELECT 1 FROM rentals WHERE member_id=?
+         AND (returned_at IS NULL OR returned_at='')
+         AND (payment_status IS NULL OR payment_status IN ('paid','pending'))`,
+    )
+    .get(req.memberId);
+  if (active) return res.status(409).json({ error: 'ACTIVE_RENTAL' });
+  db.prepare('DELETE FROM users WHERE member_id=?').run(req.memberId);
+  res.json({ ok: true });
+});
+
 /* ---------- public data ---------- */
 router.get('/bikes', (_req, res) => {
   res.json({ bikes: db.prepare('SELECT * FROM bikes').all().map(mapBike) });

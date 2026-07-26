@@ -193,6 +193,18 @@ const en: Dict = {
   productLease: 'Lease',
   btnApplyLease: 'Apply to lease this bike',
   leaseNote: 'Ride a new bike on a 2-year plan (insurance renewal & maintenance included)',
+
+  // account (member info / deletion)
+  mAccountT: 'Account',
+  mAccountS: 'Member info & account deletion',
+  accountTitle: 'Account',
+  withdrawH: 'Delete account',
+  withdrawNote:
+    'After deletion you can no longer sign in with this account. Records of completed rentals are retained for a period required by law and bookkeeping.',
+  btnWithdraw: 'Delete my account',
+  withdrawConfirm: 'Really delete your account? This cannot be undone.',
+  withdrawDone: 'Your account has been deleted',
+  errActiveRental: 'You still have an active rental or lease. Please return the bike first.',
 };
 
 export default en;

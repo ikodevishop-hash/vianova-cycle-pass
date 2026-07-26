@@ -189,6 +189,17 @@ const zh: Dict = {
   productLease: '租赁',
   btnApplyLease: '申请租赁此车',
   leaseNote: '新车可2年合约乘坐的计划（含保险更新与保养）',
+
+  // account (member info / deletion)
+  mAccountT: '账户',
+  mAccountS: '会员信息・注销账户',
+  accountTitle: '账户',
+  withdrawH: '注销账户',
+  withdrawNote: '注销后将无法再使用此账户登录。已归还的使用记录将依法律及会计要求保存一定期间。',
+  btnWithdraw: '注销账户',
+  withdrawConfirm: '确定要注销账户吗？此操作无法撤销。',
+  withdrawDone: '账户已注销',
+  errActiveRental: '您仍有租借或租赁中的自行车，请先归还后再办理。',
 };
 
 export default zh;

@@ -98,6 +98,8 @@ export function errKey(e: unknown): string {
       return 'errPw';
     case 'INVALID_ID':
       return 'errIdAlnum';
+    case 'ACTIVE_RENTAL':
+      return 'errActiveRental';
     default:
       return 'errGeneric';
   }

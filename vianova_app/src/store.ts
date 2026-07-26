@@ -126,6 +126,12 @@ export async function logout(): Promise<void> {
   emit();
 }
 
+/** Account deletion (退会). Rejected with ACTIVE_RENTAL while renting/leasing. */
+export async function deleteAccount(): Promise<void> {
+  await api<{ ok: true }>('/api/me', { method: 'DELETE' });
+  await logout();
+}
+
 export async function createRental(d: RentalDraft): Promise<Rental> {
   const r = await api<{ rental: Rental }>('/api/rentals', {
     method: 'POST',
