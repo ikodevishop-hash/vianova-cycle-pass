@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,6 +13,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, R, shadow } from '../theme';
+
+// Horizontal brand logo (white version for dark headers). Source: official
+// vianova design PDF; aspect ratio 2124:444.
+const LOGO_WHITE = require('../../assets/brand-logo-white.png');
+const LOGO_ASPECT = 2124 / 444;
 
 export function Btn({
   title,
@@ -114,6 +120,17 @@ export function Pill({ text }: { text: string }) {
     <View style={st.pill}>
       <Text style={st.pillText}>{text}</Text>
     </View>
+  );
+}
+
+/** Horizontal brand logo (emblem + vianova script + CYCLE PASS). */
+export function BrandLogo({ height = 34 }: { height?: number }) {
+  return (
+    <Image
+      source={LOGO_WHITE}
+      style={{ height, width: Math.round(height * LOGO_ASPECT) }}
+      resizeMode="contain"
+    />
   );
 }
 

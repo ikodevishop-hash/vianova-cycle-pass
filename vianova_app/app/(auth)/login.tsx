@@ -12,7 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Btn, Card, Field, BrandMark, Pill } from '../../src/components/ui';
+import { Btn, Card, Field, BrandLogo, Pill } from '../../src/components/ui';
 import { LangSwitch } from '../../src/components/LangSwitch';
 import { useToast } from '../../src/components/toast';
 import { login, resendVerification } from '../../src/store';
@@ -83,15 +83,7 @@ export default function Login() {
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <BrandMark size={34} />
-              <View>
-                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>Vianova</Text>
-                <Text style={{ color: 'rgba(255,255,255,.7)', fontSize: 10, letterSpacing: 3, fontWeight: '600' }}>
-                  {t('brandSub')}
-                </Text>
-              </View>
-            </View>
+            <BrandLogo height={42} />
             <LangSwitch dark />
           </View>
 

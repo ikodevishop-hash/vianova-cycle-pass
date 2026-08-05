@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from '../theme';
 import { LangSwitch } from './LangSwitch';
-import { BrandMark } from './ui';
+import { BrandLogo } from './ui';
 
 export function TopBar({
   title,
@@ -52,10 +52,7 @@ export function TopBar({
         ) : null}
 
         {brand ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-            <BrandMark size={30} />
-            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>Vianova</Text>
-          </View>
+          <BrandLogo height={30} />
         ) : (
           <Text style={{ color: '#fff', fontSize: 17, fontWeight: '700' }} numberOfLines={1}>
             {title}
