@@ -69,6 +69,9 @@ function bikeParams(body) {
     color: String(body.color || '').trim(),
     security_no: String(body.securityNo || '').trim(),
     product_type: body.productType === 'lease' ? 'lease' : 'rental',
+    bike_terms: String(body.bikeTerms || '').trim(),
+    plan_desc: String(body.planDesc || '').trim(),
+    ts_insurance: String(body.tsInsurance || '').trim(),
     note: String(body.note || '').trim(),
     photos: JSON.stringify(Array.isArray(body.photos) ? body.photos.slice(0, 4) : []),
   };
@@ -79,8 +82,8 @@ router.post('/bikes', (req, res) => {
   if (!p.name || !p.spec_short || !p.price_monthly) return res.status(400).json({ error: 'INVALID_FIELDS' });
   const id = 'BK' + Date.now();
   db.prepare(
-    `INSERT INTO bikes (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,product_type,note,photos)
-     VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,0,@product_type,@note,@photos)`,
+    `INSERT INTO bikes (id,name,emoji,spec_short,spec_long,price_monthly,frame_no,insurance,color,security_no,rented,product_type,bike_terms,plan_desc,ts_insurance,note,photos)
+     VALUES (@id,@name,@emoji,@spec_short,@spec_long,@price_monthly,@frame_no,@insurance,@color,@security_no,0,@product_type,@bike_terms,@plan_desc,@ts_insurance,@note,@photos)`,
   ).run({ id, ...p });
   res.json({ bike: mapBike(db.prepare('SELECT * FROM bikes WHERE id=?').get(id)) });
 });
@@ -92,7 +95,8 @@ router.put('/bikes/:id', (req, res) => {
   if (!p.name || !p.spec_short || !p.price_monthly) return res.status(400).json({ error: 'INVALID_FIELDS' });
   db.prepare(
     `UPDATE bikes SET name=@name,emoji=@emoji,spec_short=@spec_short,spec_long=@spec_long,
-      price_monthly=@price_monthly,frame_no=@frame_no,insurance=@insurance,color=@color,security_no=@security_no,product_type=@product_type,note=@note,photos=@photos
+      price_monthly=@price_monthly,frame_no=@frame_no,insurance=@insurance,color=@color,security_no=@security_no,product_type=@product_type,
+      bike_terms=@bike_terms,plan_desc=@plan_desc,ts_insurance=@ts_insurance,note=@note,photos=@photos
      WHERE id=@id`,
   ).run({ id: req.params.id, ...p });
   res.json({ bike: mapBike(db.prepare('SELECT * FROM bikes WHERE id=?').get(req.params.id)) });

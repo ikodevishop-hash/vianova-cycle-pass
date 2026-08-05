@@ -7,6 +7,7 @@ const mapBike = (r) => ({
   priceMonthly: r.price_monthly, frameNo: r.frame_no, insurance: r.insurance,
   color: r.color || '', securityNo: r.security_no || '', rented: !!r.rented,
   productType: r.product_type || 'rental',
+  bikeTerms: r.bike_terms || '', planDesc: r.plan_desc || '', tsInsurance: r.ts_insurance || '',
   note: r.note, photos: JSON.parse(r.photos || '[]'),
 });
 const mapRental = (r) => ({

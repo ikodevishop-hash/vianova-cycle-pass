@@ -204,6 +204,14 @@ const zh: Dict = {
   // legal links
   legalTokushoho: '基于特定商业交易法的标示',
   legalPrivacy: '隐私政策',
+
+  // per-bike terms / plan / TS insurance
+  btnBikeInfo: '查看使用条款与方案说明',
+  bikeInfoTitle: '使用条款与方案说明',
+  sectionPlan: '方案说明',
+  sectionBikeTerms: '本车型使用条款',
+  emptyBikeInfo: '该车型尚未登记使用条款或方案说明。',
+  labelTsInsurance: 'TS保险期限',
 };
 
 export default zh;

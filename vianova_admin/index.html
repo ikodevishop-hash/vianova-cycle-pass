@@ -238,7 +238,10 @@
               <div><label>保険期限</label><input type="date" id="bk-insurance"></div>
               <div><label>カラー</label><input type="text" id="bk-color" placeholder="ホワイト / ブラック など"></div>
               <div><label>防犯登録番号</label><input type="text" id="bk-securityno" placeholder="例：大阪 あ 12345"></div>
+              <div><label>TS保険期限（自転車TSマーク保険）</label><input type="date" id="bk-tsinsurance"></div>
               <div><label>絵文字アイコン（写真なしの場合）</label><input type="text" id="bk-emoji" placeholder="🚲" maxlength="2"></div>
+              <div class="full"><label>プラン説明（この車種のプラン内容。アプリの詳細・証明書から表示）</label><textarea id="bk-plandesc" placeholder="例：新車が2年契約で乗れるプラン。保険更新・メンテナンス込み。…"></textarea></div>
+              <div class="full"><label>車種別利用規約（この車種専用の規約。ログイン時の全体規約とは別）</label><textarea id="bk-terms" style="min-height:140px" placeholder="この車種のご利用条件・注意事項など"></textarea></div>
               <div class="full"><label>備考</label><textarea id="bk-note" placeholder="メモ・特記事項"></textarea></div>
             </div>
             <div class="err" id="bk-err"></div>
@@ -579,7 +582,7 @@ function pickPhoto(i){
   inp.click();
 }
 function setBikeType(type){ const el=document.querySelector('input[name="bk-type"][value="'+(type==='lease'?'lease':'rental')+'"]'); if(el) el.checked=true; }
-function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-color','bk-securityno','bk-emoji','bk-note'].forEach(x=>$(x).value=''); setBikeType('rental'); $('bk-err').textContent=''; renderPhotoSlots(); }
+function clearBikeForm(){ bikePhotos=[]; ['bk-name','bk-price','bk-specshort','bk-speclong','bk-frame','bk-insurance','bk-color','bk-securityno','bk-tsinsurance','bk-plandesc','bk-terms','bk-emoji','bk-note'].forEach(x=>$(x).value=''); setBikeType('rental'); $('bk-err').textContent=''; renderPhotoSlots(); }
 $('bk-new').onclick=()=>{ editingBikeId=null; $('bk-form-title').textContent='自転車の新規登録'; $('bk-delete').style.display='none'; clearBikeForm(); goView('v-bike-form'); };
 async function editBike(id){
   let b = bikeCache.find(x=>x.id===id);
@@ -589,7 +592,9 @@ async function editBike(id){
   bikePhotos=(b.photos||[]).slice();
   $('bk-name').value=b.name||''; $('bk-price').value=b.priceMonthly||''; $('bk-specshort').value=b.specShort||'';
   $('bk-speclong').value=b.specLong||''; $('bk-frame').value=b.frameNo||''; $('bk-insurance').value=b.insurance||'';
-  $('bk-color').value=b.color||''; $('bk-securityno').value=b.securityNo||''; $('bk-emoji').value=b.emoji||''; $('bk-note').value=b.note||''; setBikeType(b.productType||'rental'); $('bk-err').textContent='';
+  $('bk-color').value=b.color||''; $('bk-securityno').value=b.securityNo||''; $('bk-tsinsurance').value=b.tsInsurance||'';
+  $('bk-plandesc').value=b.planDesc||''; $('bk-terms').value=b.bikeTerms||'';
+  $('bk-emoji').value=b.emoji||''; $('bk-note').value=b.note||''; setBikeType(b.productType||'rental'); $('bk-err').textContent='';
   renderPhotoSlots(); goView('v-bike-form');
 }
 $('bk-cancel').onclick=back;
@@ -600,6 +605,7 @@ $('bk-save').onclick=async()=>{
     frameNo:$('bk-frame').value.trim(), insurance:$('bk-insurance').value,
     color:$('bk-color').value.trim(), securityNo:$('bk-securityno').value.trim(), emoji:$('bk-emoji').value.trim()||'🚲',
     productType:(document.querySelector('input[name="bk-type"]:checked')||{}).value||'rental',
+    tsInsurance:$('bk-tsinsurance').value, planDesc:$('bk-plandesc').value.trim(), bikeTerms:$('bk-terms').value.trim(),
     note:$('bk-note').value.trim(), photos:bikePhotos.slice() };
   if(!body.name||!body.specShort||!body.priceMonthly){ err.textContent='自転車名・月額・簡単なスペックは必須です。'; return; }
   try {

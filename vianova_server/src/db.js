@@ -69,6 +69,11 @@ ensureColumn('rentals', 'product_type', "TEXT DEFAULT 'rental'");
 ensureColumn('rentals', 'order_id', 'TEXT');
 ensureColumn('rentals', 'payment_status', 'TEXT');
 ensureColumn('rentals', 'amount', 'INTEGER');
+// Per-bike terms / plan description (separate from the global login terms) and
+// TS bicycle-insurance expiry. Shown from the bike detail & certificate screens.
+ensureColumn('bikes', 'bike_terms', 'TEXT');
+ensureColumn('bikes', 'plan_desc', 'TEXT');
+ensureColumn('bikes', 'ts_insurance', 'TEXT');
 
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {

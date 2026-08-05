@@ -31,6 +31,12 @@ export interface Bike {
   rented: boolean;
   /** 'rental' (レンタル) or 'lease' (リース＝新車2年契約). */
   productType: 'rental' | 'lease';
+  /** Per-bike terms (車種別利用規約, separate from the global login terms). */
+  bikeTerms: string;
+  /** Plan description for this bike (プラン説明). */
+  planDesc: string;
+  /** TS-mark bicycle insurance expiry (YYYY-MM-DD). */
+  tsInsurance: string;
   /** Free-form operator note. */
   note: string;
   /** Data-URI / remote photo URLs (max 4). */

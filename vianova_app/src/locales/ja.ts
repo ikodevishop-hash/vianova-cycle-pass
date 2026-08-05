@@ -225,6 +225,14 @@ const ja = {
   // legal links
   legalTokushoho: '特定商取引法に基づく表記',
   legalPrivacy: 'プライバシーポリシー',
+
+  // per-bike terms / plan / TS insurance
+  btnBikeInfo: '利用規約・プラン説明を見る',
+  bikeInfoTitle: '利用規約・プラン説明',
+  sectionPlan: 'プラン説明',
+  sectionBikeTerms: 'この車種の利用規約',
+  emptyBikeInfo: 'この車種の利用規約・プラン説明は登録されていません。',
+  labelTsInsurance: 'TS保険期限',
 };
 
 export type Dict = typeof ja;

@@ -1,14 +1,16 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { TopBar } from '../src/components/TopBar';
-import { Card, Badge } from '../src/components/ui';
-import { myRentals, useDB } from '../src/store';
+import { Btn, Card, Badge } from '../src/components/ui';
+import { findBike, myRentals, useDB } from '../src/store';
 import { fmtDate, yen } from '../src/format';
 import { C } from '../src/theme';
 
 export default function Cert() {
   const { t } = useTranslation();
+  const router = useRouter();
   useDB();
   const list = myRentals();
 
@@ -22,37 +24,51 @@ export default function Cert() {
             <Text style={{ marginTop: 10, color: C.muted, fontSize: 14 }}>{t('emptyCert')}</Text>
           </View>
         ) : (
-          list.map((r) => (
-            <Card key={r.rentalId} style={{ marginBottom: 14 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                <Badge
-                  text={t(r.productType === 'lease' ? 'productLease' : 'productRental')}
-                  bg={r.productType === 'lease' ? C.ink2 : C.accent}
-                />
-                <Text style={{ fontWeight: '700', letterSpacing: 1, color: C.ink }}>{r.rentalId}</Text>
-              </View>
-              <Text style={{ fontSize: 18, fontWeight: '700', color: C.ink, marginVertical: 4 }}>{r.bikeName}</Text>
-              <Row k={t('certStart')} v={fmtDate(r.startedAt)} />
-              <Row k={t('certBikename')} v={r.bikeName} />
-              <Row k={t('certSpec')} v={r.specShort || '—'} />
-              <Row k={t('labelColor')} v={r.bikeColor || '—'} />
-              <Row k={t('labelSecurityNo')} v={r.bikeSecurityNo || '—'} />
-              <Row k={t('certPrice')} v={`${yen(r.priceMonthly)} ${t('perMonth')}`} />
-              <Row k={t('certHolder')} v={r.customerName} last={!r.storeName} />
-              {r.storeName ? (
-                <>
-                  <Text style={{ marginTop: 14, marginBottom: 2, fontSize: 13, fontWeight: '700', color: C.ink }}>
-                    {t('labelStore')}
-                  </Text>
-                  <Row k={t('storeName')} v={r.storeName} />
-                  <Row k={t('storeAddress')} v={r.storeAddress || '—'} />
-                  <Row k={t('storePhone')} v={r.storePhone || '—'} />
-                  <Row k={t('storeHours')} v={r.storeHours || '—'} />
-                  <Row k={t('storeHoliday')} v={r.storeHoliday || t('holidayNone')} last />
-                </>
-              ) : null}
-            </Card>
-          ))
+          list.map((r) => {
+            // Live bike lookup: per-bike terms/plan + TS insurance stay current
+            // even after contract (e.g. yearly TS-mark renewal).
+            const bike = findBike(r.bikeId);
+            return (
+              <Card key={r.rentalId} style={{ marginBottom: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <Badge
+                    text={t(r.productType === 'lease' ? 'productLease' : 'productRental')}
+                    bg={r.productType === 'lease' ? C.ink2 : C.accent}
+                  />
+                  <Text style={{ fontWeight: '700', letterSpacing: 1, color: C.ink }}>{r.rentalId}</Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: C.ink, marginVertical: 4 }}>{r.bikeName}</Text>
+                <Row k={t('certStart')} v={fmtDate(r.startedAt)} />
+                <Row k={t('certBikename')} v={r.bikeName} />
+                <Row k={t('certSpec')} v={r.specShort || '—'} />
+                <Row k={t('labelColor')} v={r.bikeColor || '—'} />
+                <Row k={t('labelSecurityNo')} v={r.bikeSecurityNo || '—'} />
+                {bike?.tsInsurance ? <Row k={t('labelTsInsurance')} v={fmtDate(bike.tsInsurance)} /> : null}
+                <Row k={t('certPrice')} v={`${yen(r.priceMonthly)} ${t('perMonth')}`} />
+                <Row k={t('certHolder')} v={r.customerName} last={!r.storeName} />
+                {r.storeName ? (
+                  <>
+                    <Text style={{ marginTop: 14, marginBottom: 2, fontSize: 13, fontWeight: '700', color: C.ink }}>
+                      {t('labelStore')}
+                    </Text>
+                    <Row k={t('storeName')} v={r.storeName} />
+                    <Row k={t('storeAddress')} v={r.storeAddress || '—'} />
+                    <Row k={t('storePhone')} v={r.storePhone || '—'} />
+                    <Row k={t('storeHours')} v={r.storeHours || '—'} />
+                    <Row k={t('storeHoliday')} v={r.storeHoliday || t('holidayNone')} last />
+                  </>
+                ) : null}
+                {bike ? (
+                  <Btn
+                    title={t('btnBikeInfo')}
+                    kind="ghost"
+                    onPress={() => router.push(`/bike-info?bikeId=${bike.id}` as never)}
+                    style={{ marginTop: 14 }}
+                  />
+                ) : null}
+              </Card>
+            );
+          })
         )}
       </ScrollView>
     </View>

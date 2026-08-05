@@ -209,6 +209,14 @@ const en: Dict = {
   // legal links
   legalTokushoho: 'Legal notice (Specified Commercial Transactions Act)',
   legalPrivacy: 'Privacy policy',
+
+  // per-bike terms / plan / TS insurance
+  btnBikeInfo: 'View terms & plan details',
+  bikeInfoTitle: 'Terms & plan details',
+  sectionPlan: 'Plan description',
+  sectionBikeTerms: 'Terms for this bike',
+  emptyBikeInfo: 'No terms or plan description have been registered for this bike.',
+  labelTsInsurance: 'TS insurance expiry',
 };
 
 export default en;

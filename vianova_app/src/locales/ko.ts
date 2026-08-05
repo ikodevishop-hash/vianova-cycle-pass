@@ -209,6 +209,14 @@ const ko: Dict = {
   // legal links
   legalTokushoho: '특정상거래법에 따른 표기',
   legalPrivacy: '개인정보 처리방침',
+
+  // per-bike terms / plan / TS insurance
+  btnBikeInfo: '이용약관·플랜 설명 보기',
+  bikeInfoTitle: '이용약관·플랜 설명',
+  sectionPlan: '플랜 설명',
+  sectionBikeTerms: '이 차종의 이용약관',
+  emptyBikeInfo: '이 차종의 이용약관·플랜 설명이 등록되어 있지 않습니다.',
+  labelTsInsurance: 'TS보험 만료일',
 };
 
 export default ko;

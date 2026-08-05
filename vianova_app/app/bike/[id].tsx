@@ -79,10 +79,18 @@ export default function BikeDetail() {
           <SpecRow k={t('specPrice')} v={`${yen(bike.priceMonthly)} ${t('perMonth')}`} last />
         </Card>
 
+        {/* Per-bike terms & plan description set in the master admin. */}
+        <Btn
+          title={t('btnBikeInfo')}
+          kind="ghost"
+          onPress={() => router.push(`/bike-info?bikeId=${bike.id}` as never)}
+          style={{ marginTop: 14 }}
+        />
+
         <Btn
           title={t(bike.productType === 'lease' ? 'btnApplyLease' : 'btnApplyThis')}
           onPress={() => router.push(`/apply?bikeId=${bike.id}` as never)}
-          style={{ marginTop: 16 }}
+          style={{ marginTop: 10 }}
         />
       </ScrollView>
     </View>
