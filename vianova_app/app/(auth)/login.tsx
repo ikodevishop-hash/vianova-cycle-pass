@@ -16,7 +16,7 @@ import { Btn, Card, Field, BrandLogo, Pill } from '../../src/components/ui';
 import { LangSwitch } from '../../src/components/LangSwitch';
 import { useToast } from '../../src/components/toast';
 import { login, resendVerification } from '../../src/store';
-import { ApiError, errKey, getBaseUrl, setBaseUrl } from '../../src/api';
+import { ApiError, errKey } from '../../src/api';
 import { C, R } from '../../src/theme';
 
 export default function Login() {
@@ -30,8 +30,6 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [unverified, setUnverified] = useState(false);
   const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
-  const [showServer, setShowServer] = useState(false);
-  const [serverUrl, setServerUrl] = useState(getBaseUrl());
 
   const doLogin = async () => {
     if (!id.trim() || !pw) return;
@@ -138,40 +136,8 @@ export default function Login() {
           </Card>
           <View style={{ height: 14 }} />
           <Btn title={t('toRegister')} kind="ghost" onPress={() => router.push('/register')} />
-
-          <Pressable onPress={() => setShowServer(true)} style={{ marginTop: 22, alignItems: 'center' }}>
-            <Text style={{ color: '#b9b2a0', fontSize: 11.5 }}>{t('serverSettings')}</Text>
-          </Pressable>
         </View>
       </ScrollView>
-
-      <Modal visible={showServer} transparent animationType="fade" onRequestClose={() => setShowServer(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(18,58,64,.5)', justifyContent: 'center', padding: 22 }}>
-          <Card>
-            <Text style={{ fontWeight: '700', fontSize: 16, marginBottom: 14, color: C.ink }}>{t('serverSettings')}</Text>
-            <Field
-              label={t('serverUrl')}
-              value={serverUrl}
-              onChangeText={setServerUrl}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-              placeholder="http://localhost:4080"
-            />
-            <Btn
-              title={t('save')}
-              onPress={async () => {
-                await setBaseUrl(serverUrl);
-                setShowServer(false);
-                toast(t('save'));
-              }}
-              style={{ marginTop: 6 }}
-            />
-            <View style={{ height: 10 }} />
-            <Btn title={t('cancel')} kind="ghost" onPress={() => setShowServer(false)} />
-          </Card>
-        </View>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }

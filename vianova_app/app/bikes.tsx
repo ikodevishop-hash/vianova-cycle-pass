@@ -52,7 +52,12 @@ export default function Bikes() {
                 ]}
               >
                 {b.photos[0] ? (
-                  <Image source={{ uri: b.photos[0] }} style={{ width: 118, height: 110 }} contentFit="cover" />
+                  // contain: show the whole bike whatever the photo's aspect ratio is.
+                  <Image
+                    source={{ uri: b.photos[0] }}
+                    style={{ width: 118, height: 110, backgroundColor: '#F2F5F3' }}
+                    contentFit="contain"
+                  />
                 ) : (
                   <View style={{ width: 118, height: 110, backgroundColor: '#E4EDE9', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontSize: 40 }}>{b.emoji}</Text>

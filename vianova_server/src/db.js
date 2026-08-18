@@ -71,6 +71,8 @@ ensureColumn('rentals', 'payment_status', 'TEXT');
 ensureColumn('rentals', 'amount', 'INTEGER');
 // Per-bike terms / plan description (separate from the global login terms) and
 // TS bicycle-insurance expiry. Shown from the bike detail & certificate screens.
+// Reception store postal code (郵便番号) — used for address lookup in the admin.
+ensureColumn('stores', 'postal_code', 'TEXT');
 ensureColumn('bikes', 'bike_terms', 'TEXT');
 ensureColumn('bikes', 'plan_desc', 'TEXT');
 ensureColumn('bikes', 'ts_insurance', 'TEXT');

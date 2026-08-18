@@ -57,6 +57,8 @@ export interface User {
 export interface Store {
   id: string;
   name: string;
+  /** Postal code (郵便番号) of the store. */
+  postalCode: string;
   address: string;
   phone: string;
   hours: string;

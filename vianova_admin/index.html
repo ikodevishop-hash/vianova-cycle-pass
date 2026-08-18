@@ -111,7 +111,7 @@
 
   .photos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .photo-slot{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:11px;background:#FAFBF9;display:grid;place-items:center;cursor:pointer;overflow:hidden;position:relative;color:var(--muted);font-size:24px}
-  .photo-slot img{width:100%;height:100%;object-fit:cover}
+  .photo-slot img{width:100%;height:100%;object-fit:contain;background:#F2F5F3}
   .photo-slot .rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:1}
 
   .kv{display:grid;grid-template-columns:160px 1fr;gap:0}
@@ -267,6 +267,15 @@
           <div class="pb">
             <div class="grid2">
               <div class="full"><label>店舗名 <span style="color:var(--persimmon)">*</span></label><input type="text" id="st-name" placeholder="Vianova 大阪本店"></div>
+              <div>
+                <label>郵便番号</label>
+                <div style="display:flex;gap:8px">
+                  <input type="text" id="st-postal" placeholder="5500004" maxlength="8" style="flex:1">
+                  <button class="btn btn-ghost btn-sm" id="st-postal-go" type="button" style="white-space:nowrap">住所検索</button>
+                </div>
+                <div class="hint" id="st-postal-hint"></div>
+              </div>
+              <div></div>
               <div class="full"><label>住所</label><input type="text" id="st-address" placeholder="大阪府大阪市…"></div>
               <div><label>電話番号</label><input type="text" id="st-phone" placeholder="06-1234-5678"></div>
               <div><label>営業時間</label><input type="text" id="st-hours" placeholder="10:00〜19:00"></div>
@@ -559,7 +568,7 @@ async function renderBikeList(){
   if(!bikes.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">🚲</div><p>まだ自転車が登録されていません。</p></div>'; return; }
   wrap.innerHTML=`<table class="table"><thead><tr><th>写真</th><th>自転車名</th><th>区分</th><th>カラー</th><th>月額</th><th>車体番号</th><th>防犯登録番号</th><th>保険期限</th><th>状態</th><th></th></tr></thead><tbody>
     ${bikes.map(b=>`<tr class="click" data-bk="${b.id}">
-      <td>${b.photos&&b.photos[0]?`<img src="${b.photos[0]}" style="width:46px;height:46px;object-fit:cover;border-radius:8px">`:`<span style="font-size:24px">${b.emoji||'🚲'}</span>`}</td>
+      <td>${b.photos&&b.photos[0]?`<img src="${b.photos[0]}" style="width:46px;height:46px;object-fit:contain;background:#F2F5F3;border-radius:8px">`:`<span style="font-size:24px">${b.emoji||'🚲'}</span>`}</td>
       <td><b>${b.name}</b><br><span style="color:var(--muted);font-size:12px">${b.specShort||''}</span></td>
       <td>${b.productType==='lease'?'<span class="chip amber">リース</span>':'<span class="chip green">レンタル</span>'}</td>
       <td>${b.color||'—'}</td>
@@ -639,7 +648,25 @@ async function renderStoreList(){
   wrap.querySelectorAll('[data-st]').forEach(tr=>tr.onclick=()=>editStore(tr.dataset.st));
 }
 function setHolidayNone(none){ $('st-holiday-none').checked=none; $('st-holiday').disabled=none; if(none) $('st-holiday').value=''; }
-function clearStoreForm(){ ['st-name','st-address','st-phone','st-hours','st-holiday'].forEach(x=>$(x).value=''); setHolidayNone(false); $('st-err').textContent=''; }
+function clearStoreForm(){ ['st-name','st-postal','st-address','st-phone','st-hours','st-holiday'].forEach(x=>$(x).value=''); setHolidayNone(false); $('st-err').textContent=''; $('st-postal-hint').textContent=''; }
+
+/* 郵便番号 → 住所 (zipaddress.net; 日本国内のみ) */
+async function lookupStorePostal(){
+  const hint=$('st-postal-hint');
+  const zip=$('st-postal').value.replace(/[^0-9]/g,'');
+  if(zip.length!==7){ hint.textContent='7桁の郵便番号を入力してください。'; return; }
+  hint.textContent='検索中…';
+  try{
+    const res=await fetch('https://api.zipaddress.net/?zipcode='+zip);
+    const j=await res.json();
+    if(j&&j.code===200&&j.data&&j.data.fullAddress){
+      $('st-address').value=j.data.fullAddress;
+      hint.textContent='住所を入力しました。番地・建物名を追記してください。';
+    } else { hint.textContent='住所が見つかりませんでした。手入力してください。'; }
+  }catch{ hint.textContent='住所検索に失敗しました。手入力してください。'; }
+}
+$('st-postal-go').onclick=lookupStorePostal;
+$('st-postal').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); lookupStorePostal(); } });
 $('st-holiday-none').onchange=e=>setHolidayNone(e.target.checked);
 $('st-new').onclick=()=>{ editingStoreId=null; $('st-form-title').textContent='受付店舗の新規登録'; $('st-delete').style.display='none'; clearStoreForm(); goView('v-store-form'); };
 async function editStore(id){
@@ -647,14 +674,14 @@ async function editStore(id){
   if(!s){ const r=await api('/api/admin/stores'); storeCache=r.stores; s=storeCache.find(x=>x.id===id); }
   if(!s) return;
   editingStoreId=id; $('st-form-title').textContent='受付店舗の編集'; $('st-delete').style.display='inline-flex';
-  $('st-name').value=s.name||''; $('st-address').value=s.address||''; $('st-phone').value=s.phone||''; $('st-hours').value=s.hours||'';
-  $('st-holiday').value=s.holiday||''; setHolidayNone(!s.holiday); $('st-err').textContent='';
+  $('st-name').value=s.name||''; $('st-postal').value=s.postalCode||''; $('st-address').value=s.address||''; $('st-phone').value=s.phone||''; $('st-hours').value=s.hours||'';
+  $('st-holiday').value=s.holiday||''; setHolidayNone(!s.holiday); $('st-err').textContent=''; $('st-postal-hint').textContent='';
   goView('v-store-form');
 }
 $('st-cancel').onclick=back;
 $('st-save').onclick=async()=>{
   const err=$('st-err'); err.textContent='';
-  const body={ name:$('st-name').value.trim(), address:$('st-address').value.trim(), phone:$('st-phone').value.trim(),
+  const body={ name:$('st-name').value.trim(), postalCode:$('st-postal').value.trim(), address:$('st-address').value.trim(), phone:$('st-phone').value.trim(),
     hours:$('st-hours').value.trim(), holiday:$('st-holiday-none').checked?'':$('st-holiday').value.trim() };
   if(!body.name){ err.textContent='店舗名は必須です。'; return; }
   try {

@@ -22,7 +22,8 @@ const mapRental = (r) => ({
 });
 const mapNews = (r) => ({ id: r.id, date: r.date, title: r.title, body: r.body, target: r.target });
 const mapStore = (r) => ({
-  id: r.id, name: r.name, address: r.address, phone: r.phone, hours: r.hours, holiday: r.holiday || '',
+  id: r.id, name: r.name, postalCode: r.postal_code || '', address: r.address,
+  phone: r.phone, hours: r.hours, holiday: r.holiday || '',
 });
 
 /** Validators (mirrors the app/prototype rules). */

@@ -177,7 +177,10 @@ export default function Apply() {
                         <View style={{ flex: 1 }}>
                           <Text style={{ fontWeight: '700', color: C.ink, fontSize: 14 }}>{s.name}</Text>
                           {s.address ? (
-                            <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{s.address}</Text>
+                            <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>
+                              {s.postalCode ? `〒${s.postalCode}  ` : ''}
+                              {s.address}
+                            </Text>
                           ) : null}
                           <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>
                             {t('storeHours')}: {s.hours || '—'}　/　{t('storeHoliday')}: {s.holiday || t('holidayNone')}

@@ -135,6 +135,7 @@ router.get('/stores', (_req, res) => {
 function storeParams(body) {
   return {
     name: String(body.name || '').trim(),
+    postal_code: String(body.postalCode || '').trim(),
     address: String(body.address || '').trim(),
     phone: String(body.phone || '').trim(),
     hours: String(body.hours || '').trim(),
@@ -147,7 +148,7 @@ router.post('/stores', (req, res) => {
   const p = storeParams(req.body);
   if (!p.name) return res.status(400).json({ error: 'INVALID_FIELDS' });
   const id = 'ST' + Date.now();
-  db.prepare('INSERT INTO stores (id,name,address,phone,hours,holiday) VALUES (@id,@name,@address,@phone,@hours,@holiday)').run({ id, ...p });
+  db.prepare('INSERT INTO stores (id,name,postal_code,address,phone,hours,holiday) VALUES (@id,@name,@postal_code,@address,@phone,@hours,@holiday)').run({ id, ...p });
   res.json({ store: mapStore(db.prepare('SELECT * FROM stores WHERE id=?').get(id)) });
 });
 
@@ -155,7 +156,7 @@ router.put('/stores/:id', (req, res) => {
   if (!db.prepare('SELECT 1 FROM stores WHERE id=?').get(req.params.id)) return res.status(404).json({ error: 'NOT_FOUND' });
   const p = storeParams(req.body);
   if (!p.name) return res.status(400).json({ error: 'INVALID_FIELDS' });
-  db.prepare('UPDATE stores SET name=@name,address=@address,phone=@phone,hours=@hours,holiday=@holiday WHERE id=@id').run({ id: req.params.id, ...p });
+  db.prepare('UPDATE stores SET name=@name,postal_code=@postal_code,address=@address,phone=@phone,hours=@hours,holiday=@holiday WHERE id=@id').run({ id: req.params.id, ...p });
   res.json({ store: mapStore(db.prepare('SELECT * FROM stores WHERE id=?').get(req.params.id)) });
 });
 

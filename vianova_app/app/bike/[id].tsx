@@ -31,11 +31,19 @@ export default function BikeDetail() {
         {bike.photos.length ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
             {bike.photos.map((p, i) => (
+              // contain + light backdrop: the whole bike stays visible for any
+              // photo aspect ratio (operators upload very different crops).
               <Image
                 key={i}
                 source={{ uri: p }}
-                style={{ width: 280, height: 200, borderRadius: R.lg, marginRight: 8 }}
-                contentFit="cover"
+                style={{
+                  width: 280,
+                  height: 200,
+                  borderRadius: R.lg,
+                  marginRight: 8,
+                  backgroundColor: '#F2F5F3',
+                }}
+                contentFit="contain"
               />
             ))}
           </ScrollView>
