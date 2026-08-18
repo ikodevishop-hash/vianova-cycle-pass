@@ -11,7 +11,7 @@ const LANGS = ['ja', 'en', 'zh', 'ko'];
 /* ---------- admin login ---------- */
 router.post('/login', (req, res) => {
   const hash = db.prepare('SELECT value FROM settings WHERE key=?').get('admin_password_hash')?.value || '';
-  if (!bcrypt.compareSync(String(req.body.password || ''), hash)) {
+  if (!bcrypt.compareSync(String(req.body.password || '').trim(), hash)) {
     return res.status(401).json({ error: 'BAD_PASSWORD' });
   }
   res.json({ token: signAdmin() });

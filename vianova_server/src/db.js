@@ -112,9 +112,9 @@ if (db.prepare('SELECT COUNT(*) c FROM stores').get().c === 0) seedStores();
       'admin_password_hash',
       bcrypt.hashSync(config.adminPassword, 10),
     );
-  } else if (process.env.ADMIN_PASSWORD && !bcrypt.compareSync(process.env.ADMIN_PASSWORD, row.value)) {
+  } else if (process.env.ADMIN_PASSWORD && !bcrypt.compareSync(config.adminPassword, row.value)) {
     db.prepare('UPDATE settings SET value=? WHERE key=?').run(
-      bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10),
+      bcrypt.hashSync(config.adminPassword, 10),
       'admin_password_hash',
     );
     console.log('[admin] password updated from ADMIN_PASSWORD env');

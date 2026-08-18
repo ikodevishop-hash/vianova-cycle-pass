@@ -370,7 +370,12 @@ async function api(path, { method='GET', body, auth=true } = {}){
   if (auth && TOKEN) headers.Authorization = 'Bearer ' + TOKEN;
   const res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   let data = null; try { data = await res.json(); } catch {}
-  if (res.status === 401) { doLogout(); throw new Error('AUTH'); }
+  if (res.status === 401) {
+    // On the login call itself a 401 means "wrong password" — surface it as
+    // such instead of silently logging out (which hid the real reason).
+    if (auth) { doLogout(); throw new Error('AUTH'); }
+    throw new Error((data && data.error) || 'BAD_PASSWORD');
+  }
   if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
   return data;
 }

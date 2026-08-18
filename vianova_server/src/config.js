@@ -15,7 +15,9 @@ module.exports = {
   adminDir: process.env.ADMIN_DIR || '',
   dataDir: process.env.DATA_DIR || path.join(__dirname, '..', 'data'),
   // Default admin password (seeded on first run; change it in the DB later).
-  adminPassword: process.env.ADMIN_PASSWORD || 'master123',
+  // Trimmed: hosting dashboards easily store a trailing newline/space, which
+  // would otherwise make the password impossible to type into a login field.
+  adminPassword: (process.env.ADMIN_PASSWORD || 'master123').trim(),
   // Mail delivery mode:
   //  - SMTP_HOST set                -> real SMTP (always wins)
   //  - else MAIL_MODE=ethereal      -> nodemailer Ethereal test inbox (real send,
