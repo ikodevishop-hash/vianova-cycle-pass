@@ -14,7 +14,7 @@
       "policy": "sdkVersion"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.vianova.cyclepass",
       "buildNumber": "1",
       "infoPlist": {
