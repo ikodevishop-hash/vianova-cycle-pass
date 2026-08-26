@@ -10,8 +10,10 @@ const app = express();
 // Behind a proxy (Render / Caddy / Nginx) so req.protocol respects x-forwarded-proto.
 app.set('trust proxy', true);
 app.use(cors());
-// ID-document photos arrive as base64 data URIs, so allow a generous body size.
-app.use(express.json({ limit: '12mb' }));
+// Photos (ID documents, bike photos) arrive as base64 data URIs, so allow a
+// generous body size. The admin shrinks bike photos client-side, but older
+// records and ID-document captures can still be large.
+app.use(express.json({ limit: '32mb' }));
 // GMO result notifications (結果通知) arrive as application/x-www-form-urlencoded.
 app.use(express.urlencoded({ extended: false }));
 

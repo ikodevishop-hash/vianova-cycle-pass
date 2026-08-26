@@ -580,6 +580,27 @@ async function renderBikeList(){
   wrap.querySelectorAll('[data-bk]').forEach(tr=>tr.onclick=()=>editBike(tr.dataset.bk));
 }
 let bikePhotos=[]; let editingBikeId=null; let bikeCache=[];
+/* 写真を最大1600px・JPEGに縮小してから保持する。
+   カメラ写真をそのまま送ると数MB×4枚でサーバーの受信上限を超えるため。 */
+function shrinkImage(file, maxPx=1600, quality=0.85){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1, maxPx/Math.max(img.width,img.height));
+        const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        const ctx=c.getContext('2d');
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);   // 透過PNGは白地に
+        ctx.drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror=reject; img.src=r.result;
+    };
+    r.onerror=reject; r.readAsDataURL(file);
+  });
+}
 function renderPhotoSlots(){
   const wrap=$('bk-photos'); wrap.innerHTML='';
   for(let i=0;i<4;i++){
@@ -592,7 +613,9 @@ function renderPhotoSlots(){
 }
 function pickPhoto(i){
   const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
-  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{bikePhotos[i]=r.result;renderPhotoSlots();};r.readAsDataURL(f);};
+  inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{ bikePhotos[i]=await shrinkImage(f); }catch{ toast('画像を読み込めませんでした'); }
+    renderPhotoSlots();};
   inp.click();
 }
 function setBikeType(type){ const el=document.querySelector('input[name="bk-type"][value="'+(type==='lease'?'lease':'rental')+'"]'); if(el) el.checked=true; }
@@ -626,7 +649,12 @@ $('bk-save').onclick=async()=>{
     if(editingBikeId) await api('/api/admin/bikes/'+editingBikeId,{method:'PUT',body});
     else await api('/api/admin/bikes',{method:'POST',body});
     bikeCache=[]; toast('保存しました'); back();
-  } catch{ err.textContent='保存に失敗しました。'; }
+  } catch(e){
+    const m=String(e&&e.message||'');
+    err.textContent = m.includes('413')||m.includes('500')
+      ? '保存に失敗しました。写真のサイズが大きすぎる可能性があります。枚数を減らすか、別の写真でお試しください。'
+      : '保存に失敗しました。（'+(m||'原因不明')+'）';
+  }
 };
 $('bk-delete').onclick=async()=>{
   if(!editingBikeId) return;
