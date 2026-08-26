@@ -220,6 +220,27 @@ router.post('/payments/start', authUser, async (req, res) => {
   res.json({ orderId: r.orderId, linkUrl: out.linkUrl, amount: r.amount });
 });
 
+// Confirm an order as paid: stamp started_at and re-assert the bike hold.
+// The hold is re-asserted because a slow 結果通知 can arrive after the app has
+// already released it (customer left the payment screen), which would otherwise
+// leave a paid rental with the bike shown as available.
+function confirmPaid(orderId) {
+  const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(orderId);
+  if (!row) return;
+  const tx = db.transaction(() => {
+    db.prepare(
+      `UPDATE rentals SET payment_status='paid',
+         started_at=CASE WHEN started_at IS NULL OR started_at='' THEN ? ELSE started_at END
+       WHERE order_id=?`,
+    ).run(new Date().toISOString(), orderId);
+    // Only while the rental is still running — never re-hold a returned bike.
+    if (row.bike_id && !row.returned_at) {
+      db.prepare('UPDATE bikes SET rented=1 WHERE id=?').run(row.bike_id);
+    }
+  });
+  tx();
+}
+
 // Mark a pending order failed and release its held bike.
 function releaseOrder(orderId, status) {
   const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(orderId);
@@ -240,11 +261,7 @@ router.post('/payments/notify', (req, res) => {
   if (row) {
     if (n.paid) {
       // Confirm: set started_at (if not already) and mark paid.
-      db.prepare(
-        `UPDATE rentals SET payment_status='paid',
-           started_at=CASE WHEN started_at IS NULL OR started_at='' THEN ? ELSE started_at END
-         WHERE order_id=?`,
-      ).run(new Date().toISOString(), n.orderId);
+      confirmPaid(n.orderId);
     } else if (row.payment_status !== 'paid') {
       releaseOrder(n.orderId, 'failed');
     }
@@ -252,9 +269,21 @@ router.post('/payments/notify', (req, res) => {
   res.type('text/plain').send('0');
 });
 
-// Browser return target after the GMO page (戻り先URL). Shown inside the app's
-// WebView; the app detects this path and closes the WebView.
-router.get('/payments/return', (_req, res) => {
+// Browser return target after the GMO page (戻り先URL). GMO's "サイトに戻る"
+// button submits a FORM POST here, so accept every method — a GET-only route
+// fell through to the 404 handler and showed a raw JSON error to the customer.
+// The posted result parameters are also applied as a safety net in case the
+// 結果通知 (webhook) has not arrived yet.
+router.all('/payments/return', (req, res) => {
+  const src = { ...(req.query || {}), ...(req.body || {}) };
+  const n = gmo.readNotification(src);
+  if (n.orderId && n.paid) {
+    const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(n.orderId);
+    if (row && row.payment_status !== 'paid') {
+      confirmPaid(n.orderId);
+      console.log('[GMO] confirmed via return page', n.orderId);
+    }
+  }
   res.type('html').send(returnPage());
 });
 
