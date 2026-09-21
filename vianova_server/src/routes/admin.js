@@ -3,7 +3,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { signAdmin, authAdmin } = require('../auth');
-const { mapBike, mapRental, mapStore, genRentalId } = require('../util');
+const { mapBike, mapRental, mapStore, genRentalId, memberRank, RANKS } = require('../util');
 
 const router = express.Router();
 const LANGS = ['ja', 'en', 'zh', 'ko'];
@@ -38,6 +38,8 @@ router.get('/customers', (_req, res) => {
     emailVerified: !!u.email_verified,
     createdAt: u.created_at,
     rentalCount: db.prepare('SELECT COUNT(*) c FROM rentals WHERE member_id=?').get(u.member_id).c,
+    rank: memberRank(u.member_id),
+    purchaseType: u.purchase_type || '',
   }));
   res.json({ customers });
 });
@@ -47,9 +49,43 @@ router.get('/customers/:id', (req, res) => {
   if (!u) return res.status(404).json({ error: 'NOT_FOUND' });
   const rentals = db.prepare('SELECT * FROM rentals WHERE member_id=? ORDER BY started_at DESC').all(u.member_id).map(mapRental);
   res.json({
-    customer: { memberId: u.member_id, email: u.email, emailVerified: !!u.email_verified, createdAt: u.created_at },
+    customer: {
+      memberId: u.member_id, email: u.email, emailVerified: !!u.email_verified, createdAt: u.created_at,
+      rank: memberRank(u.member_id), purchaseType: u.purchase_type || '', purchaseAt: u.purchase_at || '',
+    },
     rentals,
   });
+});
+
+// Record a bike purchase made at the shop (会員ランクの判定に使う).
+// '' = not a buyer, 'noins' = bought without insurance, 'ins' = with insurance.
+router.put('/customers/:id/purchase', (req, res) => {
+  const u = db.prepare('SELECT 1 FROM users WHERE member_id=?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'NOT_FOUND' });
+  const t = String(req.body.purchaseType || '');
+  if (!['', 'noins', 'ins'].includes(t)) return res.status(400).json({ error: 'INVALID_FIELDS' });
+  db.prepare('UPDATE users SET purchase_type=?, purchase_at=? WHERE member_id=?')
+    .run(t, t ? new Date().toISOString() : '', req.params.id);
+  res.json({ ok: true, rank: memberRank(req.params.id), purchaseType: t });
+});
+
+/* ---------- member rank benefits ---------- */
+router.get('/ranks', (_req, res) => {
+  const benefits = {};
+  for (const r of RANKS) {
+    benefits[r] = db.prepare('SELECT value FROM settings WHERE key=?').get('rank_benefit_' + r)?.value || '';
+  }
+  res.json({ ranks: RANKS, benefits });
+});
+
+router.put('/ranks', (req, res) => {
+  const b = req.body.benefits || {};
+  const save = db.prepare('INSERT INTO settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
+  const tx = db.transaction(() => {
+    for (const r of RANKS) if (typeof b[r] === 'string') save.run('rank_benefit_' + r, b[r]);
+  });
+  tx();
+  res.json({ ok: true });
 });
 
 /* ---------- bikes CRUD ---------- */

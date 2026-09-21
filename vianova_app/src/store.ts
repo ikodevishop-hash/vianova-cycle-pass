@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { api, getToken, loadConfig, setToken } from './api';
-import { Bike, NewsItem, Rental, RentalDraft, Store, User } from './types';
+import { Bike, Membership, NewsItem, Rental, RentalDraft, Store, User } from './types';
 import { currentLang, Lang } from './i18n';
 
 type Terms = Record<Lang, string>;
@@ -18,6 +18,7 @@ interface Cache {
   rentals: Rental[];
   news: NewsItem[];
   terms: Terms;
+  membership: Membership | null;
 }
 
 let cache: Cache = {
@@ -27,6 +28,7 @@ let cache: Cache = {
   rentals: [],
   news: [],
   terms: { ja: '', en: '', zh: '', ko: '' },
+  membership: null,
 };
 let draft: RentalDraft | null = null;
 
@@ -49,6 +51,9 @@ async function loadRentals() {
 async function loadNews() {
   cache.news = (await api<{ news: NewsItem[] }>('/api/news')).news;
 }
+async function loadMembership() {
+  cache.membership = await api<Membership>('/api/membership');
+}
 async function refreshMe() {
   cache.user = (await api<{ user: User }>('/api/me')).user;
 }
@@ -60,7 +65,7 @@ export async function hydrate(): Promise<void> {
   if (getToken()) {
     try {
       await refreshMe();
-      await Promise.allSettled([loadRentals(), loadNews()]);
+      await Promise.allSettled([loadRentals(), loadNews(), loadMembership()]);
     } catch {
       await setToken(null);
       cache.user = null;
@@ -72,7 +77,7 @@ export async function hydrate(): Promise<void> {
 /** Re-fetch everything currently relevant (e.g. after returning to home). */
 export async function reload(): Promise<void> {
   await Promise.allSettled([loadBikes(), loadStores(), loadTerms()]);
-  if (cache.user) await Promise.allSettled([loadRentals(), loadNews()]);
+  if (cache.user) await Promise.allSettled([loadRentals(), loadNews(), loadMembership()]);
   emit();
 }
 
@@ -85,6 +90,7 @@ export const getSession = () => cache.user?.memberId ?? null;
 export const currentUser = () => cache.user;
 export const myRentals = () => cache.rentals;
 export const myNews = () => cache.news;
+export const myMembership = () => cache.membership;
 export const findBike = (id: string): Bike | null => cache.bikes.find((b) => b.id === id) ?? null;
 export const findRental = (id: string): Rental | null =>
   cache.rentals.find((r) => r.rentalId === id) ?? null;
@@ -114,7 +120,7 @@ export async function login(memberId: string, password: string): Promise<void> {
   });
   await setToken(r.token);
   cache.user = r.user;
-  await Promise.allSettled([loadBikes(), loadStores(), loadRentals(), loadNews(), loadTerms()]);
+  await Promise.allSettled([loadBikes(), loadStores(), loadRentals(), loadNews(), loadTerms(), loadMembership()]);
   emit();
 }
 
@@ -123,6 +129,7 @@ export async function logout(): Promise<void> {
   cache.user = null;
   cache.rentals = [];
   cache.news = [];
+  cache.membership = null;
   emit();
 }
 
@@ -171,7 +178,7 @@ export function cancelPayment(orderId: string) {
 }
 /** Refresh bikes + rentals after a payment resolves. */
 export async function refreshAfterPayment(): Promise<void> {
-  await Promise.allSettled([loadBikes(), loadRentals()]);
+  await Promise.allSettled([loadBikes(), loadRentals(), loadMembership()]);
   emit();
 }
 

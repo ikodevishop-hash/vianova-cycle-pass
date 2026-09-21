@@ -233,6 +233,22 @@ const ja = {
   sectionBikeTerms: 'この車種の利用規約',
   emptyBikeInfo: 'この車種の利用規約・プラン説明は登録されていません。',
   labelTsInsurance: 'TS保険期限',
+
+  // membership rank (会員ランク)
+  mRankT: '会員ランク',
+  mRankS: '現在のランクと受けられる特典',
+  rankTitle: '会員ランク',
+  rankBronze: 'ブロンズ',
+  rankSilver: 'シルバー',
+  rankGold: 'ゴールド',
+  rankCurrent: '現在のランク',
+  rankYourBenefits: '受けられる特典',
+  rankAll: 'ランクと条件',
+  rankCondBronze: '会員登録をされた方',
+  rankCondSilver: '自転車をご購入（保険未加入）／月決めレンタルご利用中の方',
+  rankCondGold: '自転車をご購入（保険加入）／リースご利用中の方',
+  rankNote: 'ランクはご契約状況に応じて自動で判定されます。ご購入の登録は店舗で行います。',
+  rankNoBenefit: '特典は準備中です。',
 };
 
 export type Dict = typeof ja;

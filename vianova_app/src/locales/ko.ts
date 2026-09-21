@@ -217,6 +217,22 @@ const ko: Dict = {
   sectionBikeTerms: '이 차종의 이용약관',
   emptyBikeInfo: '이 차종의 이용약관·플랜 설명이 등록되어 있지 않습니다.',
   labelTsInsurance: 'TS보험 만료일',
+
+  // membership rank
+  mRankT: '회원 등급',
+  mRankS: '현재 등급과 받을 수 있는 혜택',
+  rankTitle: '회원 등급',
+  rankBronze: '브론즈',
+  rankSilver: '실버',
+  rankGold: '골드',
+  rankCurrent: '현재 등급',
+  rankYourBenefits: '받을 수 있는 혜택',
+  rankAll: '등급과 조건',
+  rankCondBronze: '회원 가입하신 분',
+  rankCondSilver: '자전거 구매(보험 미가입) / 월정액 렌탈 이용 중',
+  rankCondGold: '자전거 구매(보험 가입) / 리스 이용 중',
+  rankNote: '등급은 계약 상황에 따라 자동으로 판정됩니다. 구매 등록은 매장에서 진행합니다.',
+  rankNoBenefit: '혜택을 준비 중입니다.',
 };
 
 export default ko;

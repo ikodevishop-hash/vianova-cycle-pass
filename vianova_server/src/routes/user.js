@@ -6,7 +6,7 @@ const config = require('../config');
 const { signUser, authUser, newToken } = require('../auth');
 const { sendVerifyMail, mailMode } = require('../mail');
 const gmo = require('../gmo');
-const { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId, genOrderId } = require('../util');
+const { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId, genOrderId, memberRank, RANKS } = require('../util');
 
 const router = express.Router();
 
@@ -106,6 +106,22 @@ router.delete('/me', authUser, (req, res) => {
   if (active) return res.status(409).json({ error: 'ACTIVE_RENTAL' });
   db.prepare('DELETE FROM users WHERE member_id=?').run(req.memberId);
   res.json({ ok: true });
+});
+
+// Membership rank (会員ランク) + the benefit text of every rank, so the app can
+// show what the customer has now and what the next rank unlocks.
+router.get('/membership', authUser, (req, res) => {
+  const benefits = {};
+  for (const r of RANKS) {
+    benefits[r] = db.prepare('SELECT value FROM settings WHERE key=?').get('rank_benefit_' + r)?.value || '';
+  }
+  const u = db.prepare('SELECT purchase_type FROM users WHERE member_id=?').get(req.memberId);
+  res.json({
+    rank: memberRank(req.memberId),
+    ranks: RANKS,
+    benefits,
+    purchaseType: (u && u.purchase_type) || '',
+  });
 });
 
 /* ---------- public data ---------- */

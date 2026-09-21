@@ -5,15 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { TopBar } from '../src/components/TopBar';
 import { LangSwitch } from '../src/components/LangSwitch';
-import { currentUser, logout, reload, useDB } from '../src/store';
+import { currentUser, logout, myMembership, reload, useDB } from '../src/store';
 import { C, R, shadow } from '../src/theme';
 
-type MenuKey = 'bikes' | 'lease' | 'cert' | 'amount' | 'news' | 'terms' | 'account';
+/** Rank badge colours, matching the membership screen. */
+const RANK_COLOR: Record<string, string> = { bronze: '#A9713C', silver: '#8C97A0', gold: '#C9A227' };
+
+type MenuKey = 'bikes' | 'lease' | 'cert' | 'amount' | 'rank' | 'news' | 'terms' | 'account';
 const MENU: { key: MenuKey; href: string; icon: string; tKey: string; sKey: string }[] = [
   { key: 'bikes', href: '/bikes', icon: '🚲', tKey: 'mBikesT', sKey: 'mBikesS' },
   { key: 'lease', href: '/bikes?type=lease', icon: '✨', tKey: 'mLeaseT', sKey: 'mLeaseS' },
   { key: 'cert', href: '/cert', icon: '📄', tKey: 'mCertT', sKey: 'mCertS' },
   { key: 'amount', href: '/amount', icon: '💴', tKey: 'mAmtT', sKey: 'mAmtS' },
+  { key: 'rank', href: '/rank', icon: '🏅', tKey: 'mRankT', sKey: 'mRankS' },
   { key: 'news', href: '/news', icon: '📣', tKey: 'mNewsT', sKey: 'mNewsS' },
   { key: 'terms', href: '/terms', icon: '📑', tKey: 'mTermsT', sKey: 'mTermsS' },
   { key: 'account', href: '/account', icon: '👤', tKey: 'mAccountT', sKey: 'mAccountS' },
@@ -24,6 +28,7 @@ export default function Home() {
   const router = useRouter();
   useDB();
   const user = currentUser();
+  const rank = myMembership()?.rank ?? null;
 
   // Refresh bikes/news/rentals when landing on home (e.g. admin pushed news).
   useEffect(() => {
@@ -59,9 +64,25 @@ export default function Home() {
         }
       />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: C.ink }}>
-          {user ? t('homeHello', { id: user.memberId }) : t('loginH')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: C.ink }}>
+            {user ? t('homeHello', { id: user.memberId }) : t('loginH')}
+          </Text>
+          {rank ? (
+            <View
+              style={{
+                backgroundColor: RANK_COLOR[rank],
+                borderRadius: 999,
+                paddingHorizontal: 11,
+                paddingVertical: 3,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 11.5, fontWeight: '700' }}>
+                {t(rank === 'gold' ? 'rankGold' : rank === 'silver' ? 'rankSilver' : 'rankBronze')}
+              </Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={{ color: C.muted, fontSize: 13, marginTop: 4, marginBottom: 18 }}>{t('homeSub')}</Text>
 
         <View style={{ gap: 12 }}>

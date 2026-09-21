@@ -131,3 +131,16 @@ export interface VianovaDB {
   /** memberId of the signed-in user, or null. */
   session: string | null;
 }
+
+/** Membership rank (会員ランク). Derived server-side from purchases + contracts. */
+export type MemberRank = 'bronze' | 'silver' | 'gold';
+
+/** What the app shows on the membership screen. */
+export interface Membership {
+  rank: MemberRank;
+  ranks: MemberRank[];
+  /** Benefit text per rank, edited by the operator in the admin. */
+  benefits: Record<MemberRank, string>;
+  /** '' | 'noins' | 'ins' — whether the shop registered a bike purchase. */
+  purchaseType: string;
+}

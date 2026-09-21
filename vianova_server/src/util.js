@@ -26,6 +26,34 @@ const mapStore = (r) => ({
   phone: r.phone, hours: r.hours, holiday: r.holiday || '',
 });
 
+/**
+ * Member ranks (会員ランク). Highest reached wins:
+ *   gold   … bought a bike WITH insurance, or has a lease contract
+ *   silver … bought a bike WITHOUT insurance, or has a monthly rental contract
+ *   bronze … registered only
+ * Contracts count while they are running (paid and not yet returned); a
+ * purchase is permanent once the shop registers it.
+ */
+const RANKS = ['bronze', 'silver', 'gold'];
+
+function memberRank(memberId) {
+  const u = db.prepare('SELECT purchase_type FROM users WHERE member_id=?').get(memberId);
+  const purchase = (u && u.purchase_type) || '';
+  const active = db
+    .prepare(
+      `SELECT product_type FROM rentals WHERE member_id=?
+         AND (returned_at IS NULL OR returned_at='')
+         AND (payment_status IS NULL OR payment_status='paid')`,
+    )
+    .all(memberId);
+  const hasLease = active.some((r) => r.product_type === 'lease');
+  const hasRental = active.some((r) => (r.product_type || 'rental') === 'rental');
+
+  if (purchase === 'ins' || hasLease) return 'gold';
+  if (purchase === 'noins' || hasRental) return 'silver';
+  return 'bronze';
+}
+
 /** Validators (mirrors the app/prototype rules). */
 const reAlnum = (s) => /^[A-Za-z0-9]+$/.test(s);
 const reEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -45,4 +73,4 @@ function genOrderId(rentalId) {
   return `V${rentalId}${t}`.slice(0, 27);
 }
 
-module.exports = { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId, genOrderId };
+module.exports = { mapBike, mapRental, mapNews, mapStore, reAlnum, reEmail, validPw, genRentalId, genOrderId, memberRank, RANKS };

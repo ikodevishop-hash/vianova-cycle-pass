@@ -212,6 +212,22 @@ const zh: Dict = {
   sectionBikeTerms: '本车型使用条款',
   emptyBikeInfo: '该车型尚未登记使用条款或方案说明。',
   labelTsInsurance: 'TS保险期限',
+
+  // membership rank
+  mRankT: '会员等级',
+  mRankS: '当前等级与可享优惠',
+  rankTitle: '会员等级',
+  rankBronze: '青铜',
+  rankSilver: '白银',
+  rankGold: '黄金',
+  rankCurrent: '当前等级',
+  rankYourBenefits: '可享优惠',
+  rankAll: '等级与条件',
+  rankCondBronze: '已完成会员注册',
+  rankCondSilver: '购车（未投保）／正在使用月租',
+  rankCondGold: '购车（已投保）／正在使用租赁',
+  rankNote: '等级依据您的合约状况自动判定。购车记录由门店登记。',
+  rankNoBenefit: '优惠内容准备中。',
 };
 
 export default zh;

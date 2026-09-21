@@ -172,6 +172,7 @@
     <button class="nav-item" data-view="v-bikes"><span class="ic">🚲</span>自転車登録</button>
     <button class="nav-item" data-view="v-stores"><span class="ic">🏪</span>受付店舗登録</button>
     <button class="nav-item" data-view="v-terms"><span class="ic">📑</span>利用規約変更</button>
+    <button class="nav-item" data-view="v-ranks"><span class="ic">🏅</span>会員ランク設定</button>
     <button class="nav-item" data-view="v-rentals"><span class="ic">📊</span>レンタル状況</button>
     <div class="foot"><button class="logout" id="m-logout">⎋ ログアウト</button></div>
   </aside>
@@ -190,6 +191,7 @@
           <button class="dash-card" data-view="v-bikes"><span class="ic">🚲</span><div><h3>自転車登録</h3><p>写真・料金・スペック・車体番号・保険期限などの登録</p></div></button>
           <button class="dash-card" data-view="v-stores"><span class="ic">🏪</span><div><h3>受付店舗登録</h3><p>店舗名・住所・電話番号・営業時間・定休日の登録（アプリの申込で選択・証明書に表示）</p></div></button>
           <button class="dash-card" data-view="v-terms"><span class="ic">📑</span><div><h3>利用規約変更</h3><p>日本語・英語・中文・한국어の4表記をそれぞれ編集</p></div></button>
+          <button class="dash-card" data-view="v-ranks"><span class="ic">🏅</span><div><h3>会員ランク設定</h3><p>ブロンズ・シルバー・ゴールドの特典内容を編集</p></div></button>
           <button class="dash-card" data-view="v-rentals"><span class="ic">📊</span><div><h3>レンタル状況</h3><p>レンタル一覧の確認とCSVデータの書き出し</p></div></button>
         </div>
       </div>
@@ -312,6 +314,28 @@
         </div>
       </div>
 
+      <div class="view" id="v-ranks">
+        <div class="panel">
+          <div class="ph"><h2>会員ランクの特典</h2><span class="crumb">保存するとアプリの「会員ランク」画面に即反映</span></div>
+          <div class="pb">
+            <p class="hint" style="margin:0 0 16px">
+              ランクは自動判定です。<b>ブロンズ</b>＝会員登録のみ／<b>シルバー</b>＝お買い上げ（保険未加入）・月決めレンタル中／<b>ゴールド</b>＝お買い上げ（保険加入）・リース中。<br>
+              お買い上げの登録は「顧客管理 → 会員を選択」から行います。
+            </p>
+            <label>🥉 ブロンズの特典</label>
+            <textarea id="rk-bronze" style="min-height:110px" placeholder="・〇〇を受けられます"></textarea>
+            <label>🥈 シルバーの特典</label>
+            <textarea id="rk-silver" style="min-height:110px"></textarea>
+            <label>🥇 ゴールドの特典</label>
+            <textarea id="rk-gold" style="min-height:110px"></textarea>
+            <div class="row-actions">
+              <button class="btn btn-primary" id="rk-save">保存する</button>
+              <span class="hint" id="rk-status" style="align-self:center"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="view" id="v-rentals">
         <div class="panel">
           <div class="ph"><h2>レンタル状況</h2><button class="btn btn-ink btn-sm" id="rt-csv">⬇ CSVデータを書き出す</button></div>
@@ -411,8 +435,8 @@ function doLogout(){ TOKEN=''; sessionStorage.removeItem('vcp_admin_token'); $('
 $('m-logout').onclick = () => { if (confirm('ログアウトしますか？')) doLogout(); };
 
 /* ===== navigation ===== */
-const TITLES={'v-dash':'ダッシュボード','v-customers':'顧客管理','v-cust-detail':'顧客の詳細','v-bikes':'自転車登録','v-bike-form':'自転車の登録','v-stores':'受付店舗登録','v-store-form':'受付店舗の登録','v-terms':'利用規約変更','v-rentals':'レンタル状況'};
-const ROOTVIEWS=['v-dash','v-customers','v-bikes','v-stores','v-terms','v-rentals'];
+const TITLES={'v-dash':'ダッシュボード','v-customers':'顧客管理','v-cust-detail':'顧客の詳細','v-bikes':'自転車登録','v-bike-form':'自転車の登録','v-stores':'受付店舗登録','v-store-form':'受付店舗の登録','v-terms':'利用規約変更','v-ranks':'会員ランク設定','v-rentals':'レンタル状況'};
+const ROOTVIEWS=['v-dash','v-customers','v-bikes','v-stores','v-terms','v-ranks','v-rentals'];
 let viewStack=['v-dash'];
 function setActiveNav(view){
   const nv = ROOTVIEWS.includes(view)?view:(view==='v-cust-detail'?'v-customers':view==='v-bike-form'?'v-bikes':view==='v-store-form'?'v-stores':'v-dash');
@@ -429,6 +453,7 @@ async function render(view){
     if(view==='v-bikes') await renderBikeList();
     if(view==='v-stores') await renderStoreList();
     if(view==='v-terms') await renderTerms();
+    if(view==='v-ranks') await renderRanks();
     if(view==='v-rentals') await renderRentals();
   } catch(e){ if(e.message!=='AUTH') toast('読み込みに失敗しました'); }
 }
@@ -454,9 +479,10 @@ async function renderCustomers(){
   $('cust-count').textContent=`${customers.length} 名`;
   const wrap=$('cust-table');
   if(!customers.length){ wrap.innerHTML='<div class="empty"><div class="em-ic">👤</div><p>まだ会員が登録されていません。<br>アプリで新規登録するとここに表示されます。</p></div>'; return; }
-  wrap.innerHTML=`<table class="table"><thead><tr><th>会員ID</th><th>メール</th><th>確認</th><th>レンタル</th><th>登録日</th><th></th></tr></thead><tbody>
+  wrap.innerHTML=`<table class="table"><thead><tr><th>会員ID</th><th>メール</th><th>会員ランク</th><th>確認</th><th>レンタル</th><th>登録日</th><th></th></tr></thead><tbody>
     ${customers.map(u=>`<tr class="click" data-cust="${u.memberId}">
       <td class="mono">${u.memberId}</td><td>${u.email||'—'}</td>
+      <td>${rankChip(u.rank)}</td>
       <td>${u.emailVerified?'<span class="chip green">確認済</span>':'<span class="chip amber">未確認</span>'}</td>
       <td>${u.rentalCount?`<span class="chip green">${u.rentalCount}件</span>`:'<span class="chip gray">なし</span>'}</td>
       <td>${fmtDate(u.createdAt)}</td><td style="color:#BFCBC8">›</td></tr>`).join('')}
@@ -496,6 +522,16 @@ async function openCustomer(memberId){
         <div class="k">登録ID</div><div class="v mono">${u.memberId}</div>
         <div class="k">メール</div><div class="v">${u.email||'—'}</div>
         <div class="k">メール確認</div><div class="v">${u.emailVerified?'確認済':'未確認'}</div>
+        <div class="k">会員ランク</div><div class="v">${rankChip(u.rank)}</div>
+        <div class="k">お買い上げ</div><div class="v">
+          <select id="cd-purchase" style="max-width:280px">
+            <option value="" ${!u.purchaseType?'selected':''}>なし（購入していない）</option>
+            <option value="noins" ${u.purchaseType==='noins'?'selected':''}>購入あり（保険 未加入）</option>
+            <option value="ins" ${u.purchaseType==='ins'?'selected':''}>購入あり（保険 加入）</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="cd-purchase-save" style="margin-left:8px">登録</button>
+          <span class="hint" id="cd-purchase-status"></span>
+        </div>
         <div class="k">レンタルID</div><div class="v mono">${rentals.map(r=>r.rentalId).join(' , ')||'—'}</div>
         <div class="k">生年月日</div><div class="v">${r0?r0.birthdate:'—'}</div>
         <div class="k">郵便番号</div><div class="v">${r0&&r0.postalCode?r0.postalCode:'—'}</div>
@@ -508,6 +544,16 @@ async function openCustomer(memberId){
     <div class="panel"><div class="ph"><h2>レンタル履歴</h2><button class="btn btn-primary btn-sm" id="cd-rent">＋ レンタルを登録（貸出）</button></div>
       <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th><th>状態</th><th>操作</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
     </div>`;
+  $('cd-purchase-save').onclick=async()=>{
+    const st=$('cd-purchase-status'); st.textContent='保存中…';
+    try{
+      const r=await api('/api/admin/customers/'+encodeURIComponent(memberId)+'/purchase',
+        {method:'PUT',body:{purchaseType:$('cd-purchase').value}});
+      st.textContent='';
+      toast('登録しました（ランク：'+(RANK_LABEL[r.rank]||r.rank)+'）');
+      openCustomer(memberId);   // ランク表示を更新
+    }catch{ st.textContent='保存に失敗しました。'; }
+  };
   $('cd-news').onclick=()=>openNewsModal(memberId);
   $('cd-rent').onclick=()=>openRentModal(memberId, r0?r0.customerName:'');
   $('cust-detail-body').querySelectorAll('[data-return]').forEach(b=>b.onclick=()=>returnRental(b.dataset.return, memberId));
@@ -659,6 +705,27 @@ $('bk-save').onclick=async()=>{
 $('bk-delete').onclick=async()=>{
   if(!editingBikeId) return;
   if(confirm('この自転車を削除しますか？')){ try{ await api('/api/admin/bikes/'+editingBikeId,{method:'DELETE'}); bikeCache=[]; toast('削除しました'); back(); }catch{ toast('削除に失敗しました'); } }
+};
+
+/* ===== member ranks ===== */
+const RANK_LABEL={bronze:'ブロンズ',silver:'シルバー',gold:'ゴールド'};
+const RANK_CHIP={bronze:'background:#F3E7DA;color:#8A5A2B',silver:'background:#ECEFF1;color:#5F6B73',gold:'background:#FBF0CE;color:#9A7B12'};
+function rankChip(r){ return '<span class="chip" style="'+(RANK_CHIP[r]||RANK_CHIP.bronze)+'">'+(RANK_LABEL[r]||r)+'</span>'; }
+
+async function renderRanks(){
+  const { benefits } = await api('/api/admin/ranks');
+  $('rk-bronze').value=benefits.bronze||'';
+  $('rk-silver').value=benefits.silver||'';
+  $('rk-gold').value=benefits.gold||'';
+  $('rk-status').textContent='';
+}
+$('rk-save').onclick=async()=>{
+  const st=$('rk-status'); st.textContent='保存中…';
+  try{
+    await api('/api/admin/ranks',{method:'PUT',body:{benefits:{
+      bronze:$('rk-bronze').value, silver:$('rk-silver').value, gold:$('rk-gold').value }}});
+    st.textContent='保存しました'; toast('保存しました');
+  }catch{ st.textContent='保存に失敗しました。'; }
 };
 
 /* ===== reception stores ===== */

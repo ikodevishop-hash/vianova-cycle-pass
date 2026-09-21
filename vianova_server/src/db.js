@@ -69,10 +69,15 @@ ensureColumn('rentals', 'product_type', "TEXT DEFAULT 'rental'");
 ensureColumn('rentals', 'order_id', 'TEXT');
 ensureColumn('rentals', 'payment_status', 'TEXT');
 ensureColumn('rentals', 'amount', 'INTEGER');
-// Per-bike terms / plan description (separate from the global login terms) and
-// TS bicycle-insurance expiry. Shown from the bike detail & certificate screens.
+// Membership: how the customer bought a bike at a shop (registered by staff in
+// the admin). '' = never bought, 'noins' = bought without insurance,
+// 'ins' = bought with insurance. Drives the member rank together with rentals.
+ensureColumn('users', 'purchase_type', 'TEXT');
+ensureColumn('users', 'purchase_at', 'TEXT');
 // Reception store postal code (郵便番号) — used for address lookup in the admin.
 ensureColumn('stores', 'postal_code', 'TEXT');
+// Per-bike terms / plan description (separate from the global login terms) and
+// TS bicycle-insurance expiry. Shown from the bike detail & certificate screens.
 ensureColumn('bikes', 'bike_terms', 'TEXT');
 ensureColumn('bikes', 'plan_desc', 'TEXT');
 ensureColumn('bikes', 'ts_insurance', 'TEXT');
@@ -121,6 +126,21 @@ if (db.prepare('SELECT COUNT(*) c FROM stores').get().c === 0) seedStores();
     );
     console.log('[admin] password updated from ADMIN_PASSWORD env');
   }
+}
+
+// Member-rank benefits (会員ランクの特典). Editable in the admin; seeded once so
+// the app always has something to show.
+{
+  const seedBenefits = {
+    rank_benefit_bronze:
+      '・新着情報やキャンペーンのお知らせをお届けします。\n・レンタル・リースのお申し込みがいつでも可能です。',
+    rank_benefit_silver:
+      '・点検・整備の優先受付。\n・消耗品（タイヤ・チューブ等）の交換工賃を割引。\n・ブロンズ会員の特典もすべてご利用いただけます。',
+    rank_benefit_gold:
+      '・点検・整備の優先受付（最優先）。\n・修理工賃の割引率アップ。\n・盗難・事故時の保険サポート窓口をご利用いただけます。\n・シルバー会員の特典もすべてご利用いただけます。',
+  };
+  const ins = db.prepare('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)');
+  for (const [k, v] of Object.entries(seedBenefits)) ins.run(k, v);
 }
 
 // Demo user for the app — always available (email pre-verified so no confirmation needed).

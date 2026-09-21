@@ -217,6 +217,22 @@ const en: Dict = {
   sectionBikeTerms: 'Terms for this bike',
   emptyBikeInfo: 'No terms or plan description have been registered for this bike.',
   labelTsInsurance: 'TS insurance expiry',
+
+  // membership rank
+  mRankT: 'Membership rank',
+  mRankS: 'Your current rank and its benefits',
+  rankTitle: 'Membership rank',
+  rankBronze: 'Bronze',
+  rankSilver: 'Silver',
+  rankGold: 'Gold',
+  rankCurrent: 'Current rank',
+  rankYourBenefits: 'Your benefits',
+  rankAll: 'Ranks and conditions',
+  rankCondBronze: 'Registered members',
+  rankCondSilver: 'Bought a bike (without insurance) / monthly rental in progress',
+  rankCondGold: 'Bought a bike (with insurance) / lease in progress',
+  rankNote: 'Your rank is determined automatically from your contracts. Purchases are registered by the shop.',
+  rankNoBenefit: 'Benefits are being prepared.',
 };
 
 export default en;
