@@ -82,6 +82,21 @@ ensureColumn('bikes', 'bike_terms', 'TEXT');
 ensureColumn('bikes', 'plan_desc', 'TEXT');
 ensureColumn('bikes', 'ts_insurance', 'TEXT');
 
+// ----- privacy: purge stored ID-document photos -----
+// The ID-photo feature was removed for security reasons: identity is checked in
+// person at the shop and no image is captured or kept. Wipe anything older
+// installs stored so the data does not linger in backups or the admin.
+{
+  const cols = db.prepare('PRAGMA table_info(rentals)').all().map((c) => c.name);
+  if (cols.includes('id_photo')) {
+    const left = db.prepare("SELECT COUNT(*) c FROM rentals WHERE id_photo IS NOT NULL AND id_photo<>''").get().c;
+    if (left) {
+      db.prepare("UPDATE rentals SET id_photo='' WHERE id_photo IS NOT NULL AND id_photo<>''").run();
+      console.log('[privacy] cleared ' + left + ' stored ID-document photo(s)');
+    }
+  }
+}
+
 // ----- first-run seeding -----
 const seedBikes = db.transaction(() => {
   const ins = db.prepare(`INSERT INTO bikes

@@ -104,11 +104,10 @@ const ja = {
   labelAddr: 'ご住所',
   phAddr: '〇〇県〇〇市…',
   labelTel: '電話番号',
-  labelIdDoc: '本人確認書類の撮影',
-  idCam: 'カメラで身分証明書を撮影',
+  idCheckH: '本人確認について',
+  idCheckNote: '本人確認書類（運転免許証・マイナンバーカードなど）は、受付店舗でのお受け取り時にご提示ください。アプリでの撮影・画像の送信は不要です。',
   btnToPayment: 'お支払い情報の登録へ進む',
   errAllFields: 'すべての項目をご入力ください。',
-  errIdPhoto: '本人確認書類を撮影してください。',
 
   // payment (GMO mock)
   gmoTitle: 'お支払い情報の登録',

@@ -13,7 +13,7 @@ const mapBike = (r) => ({
 const mapRental = (r) => ({
   rentalId: r.rental_id, memberId: r.member_id, bikeId: r.bike_id, bikeName: r.bike_name,
   specShort: r.spec_short, priceMonthly: r.price_monthly, customerName: r.customer_name,
-  birthdate: r.birthdate, postalCode: r.postal_code || '', address: r.address, phone: r.phone, idPhoto: r.id_photo, startedAt: r.started_at,
+  birthdate: r.birthdate, postalCode: r.postal_code || '', address: r.address, phone: r.phone, startedAt: r.started_at,
   returnedAt: r.returned_at || '', productType: r.product_type || 'rental',
   orderId: r.order_id || '', paymentStatus: r.payment_status || 'paid',
   bikeColor: r.bike_color || '', bikeSecurityNo: r.bike_security_no || '',

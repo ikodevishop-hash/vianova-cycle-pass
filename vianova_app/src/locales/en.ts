@@ -98,11 +98,10 @@ const en: Dict = {
   labelAddr: 'Address',
   phAddr: '123 Main St…',
   labelTel: 'Phone number',
-  labelIdDoc: 'Photograph your ID',
-  idCam: 'Take a photo of your ID',
+  idCheckH: 'About ID verification',
+  idCheckNote: 'Please show your ID (driver’s licence, My Number card, etc.) at the pickup store. No photo or upload is needed in the app.',
   btnToPayment: 'Continue to payment',
   errAllFields: 'Please fill in all fields.',
-  errIdPhoto: 'Please photograph your ID.',
 
   gmoTitle: 'Payment registration',
   gmoSecure: '🔒 SSL secured',

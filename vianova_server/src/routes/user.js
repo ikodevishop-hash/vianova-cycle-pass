@@ -166,11 +166,11 @@ router.get('/rentals', authUser, (req, res) => {
 // Validate the application and snapshot bike/store into a rentals row.
 // paymentStatus 'paid' (mock/immediate) or 'pending' (awaiting GMO result).
 function insertRentalRow(req, opts) {
-  const { bikeId, storeId, name, birth, postalCode, addr, tel, idPhoto } = req.body || {};
+  const { bikeId, storeId, name, birth, postalCode, addr, tel } = req.body || {};
   const bike = db.prepare('SELECT * FROM bikes WHERE id=?').get(String(bikeId || ''));
   if (!bike) return { error: 'BIKE_NOT_FOUND', status: 404 };
   if (bike.rented) return { error: 'BIKE_UNAVAILABLE', status: 409 };
-  if (!name || !birth || !addr || !tel || !idPhoto) return { error: 'INVALID_FIELDS', status: 400 };
+  if (!name || !birth || !addr || !tel) return { error: 'INVALID_FIELDS', status: 400 };
   const store = storeId ? db.prepare('SELECT * FROM stores WHERE id=?').get(String(storeId)) : null;
 
   const rentalId = genRentalId();
@@ -179,13 +179,13 @@ function insertRentalRow(req, opts) {
   const tx = db.transaction(() => {
     db.prepare(
       `INSERT INTO rentals (rental_id,member_id,bike_id,bike_name,spec_short,price_monthly,
-        customer_name,birthdate,postal_code,address,phone,id_photo,started_at,product_type,
+        customer_name,birthdate,postal_code,address,phone,started_at,product_type,
         bike_color,bike_security_no,order_id,payment_status,amount,
         store_id,store_name,store_address,store_phone,store_hours,store_holiday)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).run(
       rentalId, req.memberId, bike.id, bike.name, bike.spec_short, bike.price_monthly,
-      String(name), String(birth), String(postalCode || ''), String(addr), String(tel), String(idPhoto),
+      String(name), String(birth), String(postalCode || ''), String(addr), String(tel),
       paid ? new Date().toISOString() : '', bike.product_type || 'rental',
       bike.color || '', bike.security_no || '', orderId, opts.paymentStatus, bike.price_monthly,
       store ? store.id : '', store ? store.name : '', store ? store.address : '',

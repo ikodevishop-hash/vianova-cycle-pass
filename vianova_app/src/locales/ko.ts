@@ -98,11 +98,10 @@ const ko: Dict = {
   labelAddr: '주소',
   phAddr: '〇〇시 〇〇구…',
   labelTel: '전화번호',
-  labelIdDoc: '신분증 촬영',
-  idCam: '카메라로 신분증 촬영',
+  idCheckH: '본인 확인 안내',
+  idCheckNote: '신분증(운전면허증, 마이넘버카드 등)은 접수 매장에서 수령 시 제시해 주세요. 앱에서 촬영하거나 업로드할 필요는 없습니다.',
   btnToPayment: '결제 정보 등록으로 진행',
   errAllFields: '모든 항목을 입력하세요.',
-  errIdPhoto: '신분증을 촬영하세요.',
 
   gmoTitle: '결제 정보 등록',
   gmoSecure: '🔒 SSL 보호',

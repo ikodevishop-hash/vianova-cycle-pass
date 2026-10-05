@@ -142,7 +142,7 @@ export async function deleteAccount(): Promise<void> {
 export async function createRental(d: RentalDraft): Promise<Rental> {
   const r = await api<{ rental: Rental }>('/api/rentals', {
     method: 'POST',
-    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, postalCode: d.postalCode, addr: d.addr, tel: d.tel, idPhoto: d.idPhoto },
+    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, postalCode: d.postalCode, addr: d.addr, tel: d.tel },
   });
   await Promise.allSettled([loadBikes(), loadRentals()]);
   emit();
@@ -165,7 +165,7 @@ export interface PaymentStart {
 export function startPayment(d: RentalDraft): Promise<PaymentStart> {
   return api<PaymentStart>('/api/payments/start', {
     method: 'POST',
-    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, postalCode: d.postalCode, addr: d.addr, tel: d.tel, idPhoto: d.idPhoto },
+    body: { bikeId: d.bikeId, storeId: d.storeId, name: d.name, birth: d.birth, postalCode: d.postalCode, addr: d.addr, tel: d.tel },
   });
 }
 export function getPaymentStatus(orderId: string) {

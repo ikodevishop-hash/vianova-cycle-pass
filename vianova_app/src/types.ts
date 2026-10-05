@@ -80,8 +80,6 @@ export interface Rental {
   postalCode: string;
   address: string;
   phone: string;
-  /** Data-URI of the photographed ID document. */
-  idPhoto: string;
   /** ISO timestamp of when the rental started. */
   startedAt: string;
   /** 'rental' or 'lease' — snapshot of the product type at contract time. */
@@ -118,7 +116,6 @@ export interface RentalDraft {
   postalCode: string;
   addr: string;
   tel: string;
-  idPhoto: string;
 }
 
 /** The full persisted database shape. */

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,37 +27,12 @@ export default function Apply() {
   const [addr, setAddr] = useState('');
   const [tel, setTel] = useState('');
   const [storeId, setStoreId] = useState('');
-  const [idPhoto, setIdPhoto] = useState<string | null>(null);
   const [err, setErr] = useState('');
 
   const doPostalLookup = async () => {
     const found = await lookupPostal(postalCode);
     if (found) setAddr(found);
     else toast(t('postalNotFound'));
-  };
-
-  const handleResult = (res: ImagePicker.ImagePickerResult) => {
-    if (res.canceled || !res.assets?.length) return;
-    const a = res.assets[0];
-    setIdPhoto(a.base64 ? `data:image/jpeg;base64,${a.base64}` : a.uri);
-  };
-
-  const takePhoto = async () => {
-    const perm = await ImagePicker.requestCameraPermissionsAsync();
-    if (perm.granted) {
-      handleResult(await ImagePicker.launchCameraAsync({ quality: 0.4, base64: true }));
-      return;
-    }
-    pickFromLibrary();
-  };
-
-  const pickFromLibrary = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      toast(t('errIdPhoto'));
-      return;
-    }
-    handleResult(await ImagePicker.launchImageLibraryAsync({ quality: 0.4, base64: true }));
   };
 
   const submit = () => {
@@ -73,13 +46,9 @@ export default function Apply() {
       setErr(t('errStore'));
       return;
     }
-    if (!idPhoto) {
-      setErr(t('errIdPhoto'));
-      return;
-    }
     if (!bike) return;
     const birth = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-    setDraft({ bikeId: bike.id, storeId, name: name.trim(), birth, postalCode: postalCode.trim(), addr: addr.trim(), tel: tel.trim(), idPhoto });
+    setDraft({ bikeId: bike.id, storeId, name: name.trim(), birth, postalCode: postalCode.trim(), addr: addr.trim(), tel: tel.trim() });
     router.push('/payment' as never);
   };
 
@@ -193,31 +162,20 @@ export default function Apply() {
               </View>
             ) : null}
 
-            <Text style={{ fontSize: 13, fontWeight: '700', color: C.ink, marginBottom: 6 }}>
-              {t('labelIdDoc')} *
-            </Text>
-            <Pressable
-              onPress={takePhoto}
+            {/* 本人確認は受付店舗での対面確認のみ。写真は取得・保存しない。 */}
+            <View
               style={{
-                borderWidth: 1.5,
-                borderColor: C.line,
-                borderStyle: 'dashed',
+                backgroundColor: C.accentPale,
                 borderRadius: R.sm,
-                paddingVertical: 24,
-                alignItems: 'center',
-                backgroundColor: '#FBFBF9',
+                paddingHorizontal: 14,
+                paddingVertical: 13,
               }}
             >
-              <Text style={{ fontSize: 34 }}>📷</Text>
-              <Text style={{ fontSize: 13, color: C.muted, marginTop: 8 }}>{t('idCam')}</Text>
-            </Pressable>
-            {idPhoto ? (
-              <Image
-                source={{ uri: idPhoto }}
-                style={{ width: '100%', height: 200, borderRadius: R.sm, marginTop: 10 }}
-                contentFit="cover"
-              />
-            ) : null}
+              <Text style={{ fontSize: 13, fontWeight: '700', color: C.accentPress, marginBottom: 4 }}>
+                {t('idCheckH')}
+              </Text>
+              <Text style={{ fontSize: 12.5, color: C.text, lineHeight: 20 }}>{t('idCheckNote')}</Text>
+            </View>
 
             {err ? <Text style={{ color: C.persimmon, fontWeight: '600', fontSize: 12, marginTop: 10 }}>{err}</Text> : null}
             <Btn title={t('btnToPayment')} onPress={submit} style={{ marginTop: 18 }} />

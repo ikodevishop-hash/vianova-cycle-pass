@@ -97,11 +97,10 @@ const zh: Dict = {
   labelAddr: '地址',
   phAddr: '〇〇省〇〇市…',
   labelTel: '电话号码',
-  labelIdDoc: '拍摄身份证件',
-  idCam: '用相机拍摄身份证件',
+  idCheckH: '关于身份确认',
+  idCheckNote: '请在受理店铺取车时出示身份证件（驾照、个人编号卡等）。无需在应用内拍摄或上传照片。',
   btnToPayment: '前往登记支付信息',
   errAllFields: '请填写所有项目。',
-  errIdPhoto: '请拍摄身份证件。',
 
   gmoTitle: '登记支付信息',
   gmoSecure: '🔒 SSL 保护',

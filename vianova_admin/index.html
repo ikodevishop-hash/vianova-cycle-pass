@@ -508,7 +508,6 @@ $('cust-csv').onclick=exportCustomerCsv;
 async function openCustomer(memberId){
   const { customer:u, rentals } = await api('/api/admin/customers/'+encodeURIComponent(memberId));
   const r0 = rentals[0];
-  const idPhoto = r0 && r0.idPhoto ? `<img class="idphoto" src="${r0.idPhoto}" alt="本人確認書類">` : '<span style="color:var(--muted)">（レンタル申込時に登録されます）</span>';
   const rentalRows = rentals.length ? rentals.map(r=>{
     const active=!r.returnedAt;
     const status = active ? '<span class="chip green">レンタル中</span>' : `<span class="chip gray">返却済 ${fmtDate(r.returnedAt)}</span>`;
@@ -539,7 +538,7 @@ async function openCustomer(memberId){
         <div class="k">電話番号</div><div class="v">${r0?r0.phone:'—'}</div>
         <div class="k">レンタル中の自転車</div><div class="v">${rentals.filter(r=>!r.returnedAt).map(r=>r.bikeName).join(' , ')||'—'}</div>
       </div>
-      <label style="margin-top:18px">本人確認書類</label>${idPhoto}</div>
+      </div>
     </div>
     <div class="panel"><div class="ph"><h2>レンタル履歴</h2><button class="btn btn-primary btn-sm" id="cd-rent">＋ レンタルを登録（貸出）</button></div>
       <div class="pb" style="padding:0"><table class="table"><thead><tr><th>レンタルID</th><th>自転車</th><th>月額</th><th>開始日</th><th>状態</th><th>操作</th></tr></thead><tbody>${rentalRows}</tbody></table></div>
