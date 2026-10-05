@@ -28,3 +28,6 @@ yarn-error.*
 
 # local env
 .env*.local
+
+# Android signing credentials (keystore passwords in plain text — never commit)
+credentials.json
