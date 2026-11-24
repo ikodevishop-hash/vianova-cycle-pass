@@ -268,17 +268,44 @@ function releaseOrder(orderId, status) {
   tx();
 }
 
+// Confirm an order only once GMO itself reports it paid for the amount we
+// charged. The 結果通知, the return page and the app's status check all come
+// through here, so a request that merely claims Status=CAPTURE cannot mark an
+// order paid. Returns GMO's view of the order, or null when it could not ask.
+async function verifyOrder(orderId) {
+  const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(orderId);
+  // NULL payment_status = legacy/admin row, already treated as paid.
+  if (!row || !gmo.isConfigured() || !row.payment_status || row.payment_status === 'paid') return null;
+  let t;
+  try {
+    t = await gmo.searchTrade(orderId);
+  } catch (e) {
+    console.error('[GMO] searchTrade error', orderId, e.message);
+    return null;
+  }
+  if (!t.ok) {
+    console.warn('[GMO] searchTrade', orderId, t.errCode, t.errInfo);
+    return null;
+  }
+  if (t.paid && t.amount === row.amount) {
+    confirmPaid(orderId);
+    console.log('[GMO] verified paid', orderId, t.status, t.amount);
+  } else if (t.paid) {
+    console.error('[GMO] amount mismatch', orderId, 'gmo', t.amount, 'expected', row.amount);
+  }
+  return t;
+}
+
 // GMO result notification (結果通知). POST application/x-www-form-urlencoded.
 // Must respond with plain "0" (received OK) so GMO stops retrying.
-router.post('/payments/notify', (req, res) => {
+router.post('/payments/notify', async (req, res) => {
   const n = gmo.readNotification(req.body || {});
   console.log('[GMO] notify', n.orderId, n.status, n.paid ? 'PAID' : 'not-paid');
-  const row = n.orderId && db.prepare('SELECT * FROM rentals WHERE order_id=?').get(n.orderId);
-  if (row) {
-    if (n.paid) {
-      // Confirm: set started_at (if not already) and mark paid.
-      confirmPaid(n.orderId);
-    } else if (row.payment_status !== 'paid') {
+  if (n.orderId) {
+    const t = await verifyOrder(n.orderId);
+    // Release the held bike only when both the notification and GMO say unpaid.
+    const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(n.orderId);
+    if (t && !t.paid && !n.paid && row && row.payment_status === 'pending') {
       releaseOrder(n.orderId, 'failed');
     }
   }
@@ -290,23 +317,21 @@ router.post('/payments/notify', (req, res) => {
 // fell through to the 404 handler and showed a raw JSON error to the customer.
 // The posted result parameters are also applied as a safety net in case the
 // 結果通知 (webhook) has not arrived yet.
-router.all('/payments/return', (req, res) => {
+router.all('/payments/return', async (req, res) => {
   const src = { ...(req.query || {}), ...(req.body || {}) };
   const n = gmo.readNotification(src);
-  if (n.orderId && n.paid) {
-    const row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(n.orderId);
-    if (row && row.payment_status !== 'paid') {
-      confirmPaid(n.orderId);
-      console.log('[GMO] confirmed via return page', n.orderId);
-    }
-  }
+  if (n.orderId) await verifyOrder(n.orderId);
   res.type('html').send(returnPage());
 });
 
 // The app polls this after the WebView returns, to learn the final status.
-router.get('/payments/:orderId/status', authUser, (req, res) => {
-  const row = db.prepare('SELECT * FROM rentals WHERE order_id=? AND member_id=?').get(req.params.orderId, req.memberId);
+router.get('/payments/:orderId/status', authUser, async (req, res) => {
+  let row = db.prepare('SELECT * FROM rentals WHERE order_id=? AND member_id=?').get(req.params.orderId, req.memberId);
   if (!row) return res.status(404).json({ error: 'ORDER_NOT_FOUND' });
+  if (row.payment_status && row.payment_status !== 'paid') {
+    await verifyOrder(row.order_id);
+    row = db.prepare('SELECT * FROM rentals WHERE order_id=?').get(row.order_id);
+  }
   res.json({ paymentStatus: row.payment_status || 'paid', rentalId: row.rental_id });
 });
 

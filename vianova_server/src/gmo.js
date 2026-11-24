@@ -60,6 +60,34 @@ function postJson(host, path, payload) {
   });
 }
 
+/** POST application/x-www-form-urlencoded and resolve the raw response text. */
+function postForm(host, path, params) {
+  return new Promise((resolve, reject) => {
+    const body = new URLSearchParams(params).toString();
+    const req = https.request(
+      {
+        host,
+        path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(body),
+        },
+        timeout: 15000,
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => (data += c));
+        res.on('end', () => resolve({ status: res.statusCode, raw: data }));
+      },
+    );
+    req.on('timeout', () => req.destroy(new Error('GMO_TIMEOUT')));
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 /**
  * Ask GMO for a hosted payment URL.
  * @param {{orderId:string, amount:number, tax?:number, retUrl?:string,
@@ -114,4 +142,32 @@ function readNotification(body) {
   };
 }
 
-module.exports = { isConfigured, createPaymentUrl, readNotification, PAID_STATUSES, host: G.apiHost };
+/**
+ * Ask GMO for the current state of an order (取引照会 SearchTrade).
+ * The result notification and the return page can be posted by anyone who
+ * knows an OrderID, so their Status is never trusted; an order is confirmed
+ * only on what GMO itself reports here.
+ * @returns {Promise<{ok:boolean, status?:string, paid?:boolean, amount?:number,
+ *          errCode?:string, errInfo?:string}>}
+ */
+async function searchTrade(orderId) {
+  const res = await postForm(G.apiHost, '/payment/SearchTrade.idPass', {
+    ShopID: G.shopId,
+    ShopPass: G.shopPass,
+    OrderID: orderId,
+  });
+  // Response: "OrderID=...&Status=CAPTURE&Amount=3980&..." or "ErrCode=E01&ErrInfo=E01110002".
+  const kv = new URLSearchParams(res.raw || '');
+  if (kv.get('ErrCode') || res.status !== 200) {
+    return { ok: false, errCode: kv.get('ErrCode') || `HTTP_${res.status}`, errInfo: kv.get('ErrInfo') || '' };
+  }
+  const status = String(kv.get('Status') || '').toUpperCase();
+  return {
+    ok: true,
+    status,
+    paid: PAID_STATUSES.has(status),
+    amount: parseInt(kv.get('Amount') || '0', 10) || 0,
+  };
+}
+
+module.exports = { isConfigured, createPaymentUrl, searchTrade, readNotification, PAID_STATUSES, host: G.apiHost };
