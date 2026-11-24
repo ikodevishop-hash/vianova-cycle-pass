@@ -25,12 +25,14 @@ module.exports = {
   //  - else                         -> mock (nothing sent; link logged & returned in API)
   mailMode: (process.env.MAIL_MODE || '').toLowerCase(),
   smtp: {
-    host: process.env.SMTP_HOST || '',
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true', // true for port 465 (implicit TLS)
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-    from: process.env.SMTP_FROM || 'Vianova Cycle Pass <no-reply@vianova.example>',
+    // Trimmed like the GMO values: a pasted trailing space/newline would make
+    // SMTP auth fail and silently drop the server into mock mail mode.
+    host: (process.env.SMTP_HOST || '').trim(),
+    port: parseInt((process.env.SMTP_PORT || '587').trim(), 10),
+    secure: (process.env.SMTP_SECURE || '').trim() === 'true', // true for port 465 (implicit TLS)
+    user: (process.env.SMTP_USER || '').trim(),
+    pass: (process.env.SMTP_PASS || '').trim(),
+    from: (process.env.SMTP_FROM || '').trim() || 'Vianova Cycle Pass <no-reply@vianova.example>',
   },
   // GMO PG マルチペイメント — リンクタイプPlus (hosted card payment).
   //  - When GMO_SHOP_ID + GMO_SHOP_PASS are set, real GMO payment is used:
