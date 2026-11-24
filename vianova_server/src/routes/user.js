@@ -201,6 +201,8 @@ function insertRentalRow(req, opts) {
 // Legacy/mock direct-create endpoint (kept for compatibility). The app now uses
 // /payments/start, which routes to GMO when configured.
 router.post('/rentals', authUser, (req, res) => {
+  // With real payments on, a rental can only come from /payments/start.
+  if (gmo.isConfigured()) return res.status(403).json({ error: 'PAYMENT_REQUIRED' });
   const r = insertRentalRow(req, { paymentStatus: 'paid' });
   if (r.error) return res.status(r.status).json({ error: r.error });
   const row = db.prepare('SELECT * FROM rentals WHERE rental_id=?').get(r.rentalId);
