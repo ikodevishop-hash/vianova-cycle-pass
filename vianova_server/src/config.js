@@ -39,18 +39,18 @@ module.exports = {
   //  - Otherwise the app falls back to the built-in mock (demo works with no
   //    GMO account). The card number never touches this server.
   gmo: {
-    shopId: process.env.GMO_SHOP_ID || '',
-    shopPass: process.env.GMO_SHOP_PASS || '',
+    shopId: (process.env.GMO_SHOP_ID || '').trim(),
+    shopPass: (process.env.GMO_SHOP_PASS || '').trim(),
     // 設定ID (16-char) created in the GMO console — defines the payment screen
     // design and (recommended) the result-notification URL. Optional.
-    configId: process.env.GMO_CONFIG_ID || '',
+    configId: (process.env.GMO_CONFIG_ID || '').trim(),
     // API host. Test: pt01.mul-pay.jp / Production: p01.mul-pay.jp.
     // GMO_PROD=true switches to production; GMO_API_HOST overrides entirely.
     apiHost:
-      process.env.GMO_API_HOST ||
-      (process.env.GMO_PROD === 'true' ? 'p01.mul-pay.jp' : 'pt01.mul-pay.jp'),
+      (process.env.GMO_API_HOST || '').trim() ||
+      ((process.env.GMO_PROD || '').trim() === 'true' ? 'p01.mul-pay.jp' : 'pt01.mul-pay.jp'),
     // AUTH (仮売上) or CAPTURE (即時売上). Monthly fee is charged immediately.
-    jobCd: (process.env.GMO_JOBCD || 'CAPTURE').toUpperCase(),
-    prod: process.env.GMO_PROD === 'true',
+    jobCd: (process.env.GMO_JOBCD || 'CAPTURE').trim().toUpperCase(),
+    prod: (process.env.GMO_PROD || '').trim() === 'true',
   },
 };
